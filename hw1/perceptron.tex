@@ -1,0 +1,213 @@
+Recall the perceptron algorithm that we saw in class. The perceptron algorithm comes with strong theory, and you will explore some of this theory in this problem. We begin with some remarks related to notation which are valid throughout the homework. Unless stated otherwise, scalars are denoted by small letters in normal font, vectors are denoted by small letters in bold font, and matrices are denoted by capital letters in bold font. 
+
+Problem 1 asks you to show that when the two classes in a binary classification problem are linearly separable (defined later), then the perceptron algorithm will provably \emph{converge}. For the sake of this problem, we define convergence as predicting the labels of all training instances perfectly. The perceptron algorithm is described in Algorithm~\ref{alg:perceptron}. It gets access to a dataset of $n$ instances $(\mathbf{x}_i, y_i)$, where $\mathbf{x}_i \in \mathbb{R}^d$ and $y_i \in \{-1, 1\}$. It outputs a linear classifier $\mathbf{w}$. 
+\begin{algorithm}
+\caption{Perceptron}\label{alg:perceptron}
+\begin{algorithmic}
+\While{not converged}
+\State Pick a data point $(\mathbf{x}_i, y_i)$ uniformly randomly
+\State Make a prediction $\hat{y} =\sgn(\mathbf{w}^T\mathbf{x}_i)$ using current $\mathbf{w}$
+\If{$\hat{y} \neq y_i$}
+    \State $\mathbf{w} \gets \mathbf{w} + y_i\mathbf{x}_i$
+\EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+Assume there exists an optimal hyperplane $\mathbf{w}_{\text{opt}}, \|\mathbf{w}_{\text{opt}}\|_2=1$ and some $\gamma >0$ such that $y_i\cdot (\mathbf{w}_{\text{opt}}^T\mathbf{x}_i) \geq \gamma, \forall i \in \{1, 2, \dots, n\}$. Additionally, assume $\|\mathbf{x}_i\|_2 \leq R$, $\forall i \in \{1, 2, ..., n\}$ for some $R>0$. Following the steps below, show that the perceptron algorithm makes at most $\dfrac{R^2}{\gamma^2}$ errors, and therefore the algorithm must converge.
+
+% Some break down
+\textbf{1.1} (\blue{7pts}) Show that if the algorithm makes a mistake, the update rule moves the parameter $\mathbf{w}$ towards the direction of the optimal weights $\mathbf{w}_{\text{opt}}$. Specifically, denoting explicitly the updating iteration index by $k$, the current weight
+vector by $\mathbf{w}_k$, and the updated weight vector by $\mathbf{w}_{k+1}$, show that, if $y_i(\mathbf{w}_{k}^T\mathbf{x}_i) < 0$ where $(\mathbf{x}_i,y_i)$ is the instance selected in this iteration, we have
+\begin{equation}
+    \mathbf{w}_{k+1}^T\mathbf{w}_{\text{opt}} \geq \mathbf{w}_{k}^T\mathbf{w}_{\text{opt}} + \gamma \|\mathbf{w}_{\text{opt}}\|_2.
+\end{equation}
+
+\noindent{\fontsize{11}{12}\selectfont\textbf{Solution 1.1}}
+
+Suppose that at iteration $k$, the perceptron makes a mistake on example
+$(\mathbf{x}_{i}, y_i)$, i.e.,
+\[
+y_i (\mathbf{w}_k^T \mathbf{x}_i) < 0.
+\]
+
+According to the perceptron update rule, the weight vector will updated as
+\[
+\mathbf{w}_{k+1} = \mathbf{w}_k + y_i \mathbf{x}_i.
+\]
+
+Taking inner product with $\mathbf{w}_{\text{opt}}$ on both sides, we have
+\[
+\mathbf{w}_{k+1}^T \mathbf{w}_{\text{opt}}
+= \mathbf{w}_k^T \mathbf{w}_{\text{opt}} + {(y_i \mathbf{x}_i)}^T \mathbf{w}_{\text{opt}}.
+\]
+
+And since for scalar, we have $\mathbf{a}^T \mathbf{b} = \mathbf{b}^T \mathbf{a}$.
+
+\[
+y_i\cdot (\mathbf{w}_{\text{opt}}^T\mathbf{x}_i) \geq \gamma = {(y_i \mathbf{x}_i)}^T \mathbf{w}_{\text{opt}}
+\]
+
+Therefore,
+\[
+\mathbf{w}_{k+1}^T \mathbf{w}_{\text{opt}}
+\ge \mathbf{w}_k^T \mathbf{w}_{\text{opt}} + \gamma.
+\quad \text{where } \|\mathbf{w}_{\text{opt}}\|_2 = 1
+\]
+
+\bigskip
+
+\textbf{1.2} (\blue{5pts}) Show that the length of updated weights does not increase by a large amount. In particular, show that if $y_i(\mathbf{w}_{k}^T\mathbf{x}_i) < 0$, then
+\begin{equation}
+    \|\mathbf{w}_{k+1}\|_2^2 \leq \|\mathbf{w}_k\|_2^2+R^2.
+\end{equation}
+
+\noindent{\fontsize{11}{12}\selectfont\textbf{Solution 1.2}}
+
+By definition,
+\begin{align*}
+\| \mathbf{w}_{k+1} \|_2^2
+&= \| \mathbf{w}_k + y_i \mathbf{x}_i \|_2^2 \\
+&= \| \mathbf{w}_k \|_2^2+ 2 y_i \mathbf{w}_k^T \mathbf{x}_i+ \| y_i \mathbf{x}_i \|_2^2.\\
+&= \| \mathbf{w}_k \|_2^2+ 2 y_i \mathbf{w}_k^T \mathbf{x}_i+ y_i^2\|  \mathbf{x}_i \|_2^2 \quad (y_i \in \{-1, 1\}) \\
+&= \| \mathbf{w}_k \|_2^2+ 2 y_i \mathbf{w}_k^T \mathbf{x}_i+ 1\|  \mathbf{x}_i \|_2^2
+\end{align*}
+
+Since $y_i (\mathbf{w}_k^T \mathbf{x}_i) < 0$ and we assumed $\|\mathbf{x}_i\|_2 \leq R$ .
+\begin{align*}
+\| \mathbf{w}_{k+1} \|_2^2
+&= \| \mathbf{w}_k \|_2^2+ 2 y_i \mathbf{w}_k^T \mathbf{x}_i+ 1\|  \mathbf{x}_i \|_2^2\\
+&\leq \| \mathbf{w}_k \|_2^2+ 0+\|  \mathbf{x}_i \|_2^2\\
+&\leq \| \mathbf{w}_k \|_2^2+{R^2}\\
+\end{align*}
+
+\textbf{1.3} (\blue{6pts}) Assume that the initial weight vector $\mathbf{w}_{0}=\mathbf{0}$ (an all-zero vector). Using results from the previous two parts, show that for any iteration $k+1$, with $M$ being the total number of mistakes the algorithm has made for the first $k$ iterations, we have
+\begin{equation}
+    \gamma M \leq \|\mathbf{w}_{k+1}\|_2 \leq R\sqrt{M}.
+\end{equation}
+
+\emph{Hint: use the Cauchy-Schwartz inequality: $\mathbf{a}^T\mathbf{b}\leq \|\mathbf{a}\|_2 \|\mathbf{b}\|_2$.}\\
+
+\noindent{\fontsize{11}{12}\selectfont\textbf{Solution 1.3}}
+
+From 1.1 we have
+\[
+\mathbf{w}_{k+1}^T \mathbf{w}_{\text{opt}}
+\ge \mathbf{w}_k^T \mathbf{w}_{\text{opt}} + \gamma.
+\]
+
+Since $w_0 = 0$ and with M being the total number of mistakes for the k-th iteration 
+\[
+\mathbf{w}_{k+1}^T \mathbf{w}_{\text{opt}}
+\ge M \gamma = \gamma M 
+\]
+
+And using the Cauchy-Schwartz inequality:
+\[
+\mathbf{w}_{k+1}^T \mathbf{w}_{\text{opt}}
+\le \|\mathbf{w}_{k+1}\|_2 \; \|\mathbf{w}_{\text{opt}}\|_2 
+= \|\mathbf{w}_{k+1}\|_2
+\]
+
+Combined we have
+\[
+\gamma M 
+\le \mathbf{w}_{k+1}^T \mathbf{w}_{\text{opt}}
+\le \|\mathbf{w}_{k+1}\|_2 
+\]
+
+\[
+= \gamma M \le \|\mathbf{w}_{k+1}\|_2 
+\]
+
+From 1.2 we have,
+\begin{align*}
+\| \mathbf{w}_{k+1} \|_2^2
+&\leq \| \mathbf{w}_k \|_2^2+{R^2}\\
+\end{align*}
+
+Since assumed $w_0 = 0$, and perceptron only update when it made mistakes.
+
+Then for the M times mistakes happened weight vector, we donate it as $w_{im}$.
+
+When the perceptron t+1 times made mistakes,
+\[
+\mathbf{w}_{i(t+1)} = \mathbf{w}_{(i-1)t} + y_{(i-1)t} x_{(i-1)t}.
+\]
+
+Thus, for the first mistake
+\begin{align*}
+&\mathbf{w}_{i(1)} = y_{(i-1)1} x_{(i-1)1}.\\
+&\mathbf{w}_{j(2)} = y_{(i-1)1} x_{(i-1)1} +y_{(j-1)2} \; x_{(j-1)2}
+\end{align*}
+
+For clarity to read, I ignored the i times operator and rewrite it as $w_1$, $w_2$, ..., $w_m$ as M times mistakes.
+
+Thus we have,
+\begin{align*}
+&\mathbf{w_0} = 0\\
+&\mathbf{w_1} = y_{i1} x_{i1}.\\
+&\mathbf{w}_2 = y_{i1} x_{i1} +y_{j2} \; x_{j2}\\
+&...
+\end{align*}
+
+In general, the k+1 iteration vector at least has the total number of $M$ mistakes from k-th iteration
+\[
+\mathbf{w}_{k+1} = \sum_{m=1}^{M} y_{i_m} \, x_{i_m}
+\]
+
+And by definition,
+\begin{align*}
+\| \mathbf{w}_{k+1} \|_2^2
+&=\mathbf{w}_{k+1}^T \mathbf{w}_{k+1}\\
+&= \| \sum_{m=1}^{M} y_{i_m} \, x_{i_m} \|_2^2\\
+&= (\sum_{m=1}^{M} y_{i_m} \, x_{i_m})^T \; \sum_{m=1}^{M} y_{i_m} \, x_{i_m}\\
+&= \sum_{m=1}^{M}  y_{i_m}^2 (x_{i_m})^T x_{i_m}
+\end{align*}
+
+Since $y_i \in \{-1, 1\}$ , then by definition
+\begin{align*}
+\| \mathbf{w}_{k+1} \|_2^2
+&= \sum_{m=1}^{M} \| \mathbf{x}_{im} \|_2^2 \\
+& \le \sum_{m=1}^{M} {R^2} \\
+& \le MR^2
+\end{align*}
+
+Thus,
+\[
+\| \mathbf{w}_{k+1} \|_2 \le R \sqrt{M}
+\]
+
+In conclusion
+\[
+\gamma M \le \|\mathbf{w}_{k+1}\|_2 \quad \text{and} \quad \| \mathbf{w}_{k+1} \|_2 \le R \sqrt{M}
+\]
+
+Therefore, we proved
+\[
+\gamma M \leq \|\mathbf{w}_{k+1}\|_2 \leq R\sqrt{M}.
+\]
+
+\bigskip
+\textbf{1.4} (\blue{2pts}) Use \textbf{1.3} to conclude that $M \leq {R^2}/{\gamma^2}$. Therefore the algorithm can make at most ${R^2}/{\gamma^2}$ mistakes (note that there is no direct dependence on the dimensionality of the data points).
+
+\bigskip
+\noindent{\fontsize{11}{12}\selectfont\textbf{Solution 1.4}}
+
+Quick from 1.3 we have
+\[
+\gamma M \leq \|\mathbf{w}_{k+1}\|_2 \leq R\sqrt{M}.
+\]
+
+Thus
+\[
+\gamma M \leq R\sqrt{M}.
+\]
+
+Through simple calculations
+\begin{align*}
+&\gamma M \leq R\sqrt{M}\\
+\rightarrow \; &\gamma \sqrt{M} \leq R\\
+\rightarrow \; &\gamma^2 M \leq R^2 \\
+\rightarrow \; & M \leq {R^2\over{\gamma^2}}
+\end{align*}

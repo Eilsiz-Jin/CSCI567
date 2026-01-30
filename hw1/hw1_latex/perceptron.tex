@@ -1,0 +1,40 @@
+Recall the perceptron algorithm that we saw in class. The perceptron algorithm comes with strong theory, and you will explore some of this theory in this problem. We begin with some remarks related to notation which are valid throughout the homework. Unless stated otherwise, scalars are denoted by small letters in normal font, vectors are denoted by small letters in bold font, and matrices are denoted by capital letters in bold font. 
+
+Problem 1 asks you to show that when the two classes in a binary classification problem are linearly separable (defined later), then the perceptron algorithm will provably \emph{converge}. For the sake of this problem, we define convergence as predicting the labels of all training instances perfectly. The perceptron algorithm is described in Algorithm~\ref{alg:perceptron}. It gets access to a dataset of $n$ instances $(\mathbf{x}_i, y_i)$, where $\mathbf{x}_i \in \mathbb{R}^d$ and $y_i \in \{-1, 1\}$. It outputs a linear classifier $\mathbf{w}$. 
+\begin{algorithm}
+\caption{Perceptron}\label{alg:perceptron}
+\begin{algorithmic}
+\While{not converged}
+\State Pick a data point $(\mathbf{x}_i, y_i)$ uniformly randomly
+\State Make a prediction $\hat{y} =\sgn(\mathbf{w}^T\mathbf{x}_i)$ using current $\mathbf{w}$
+\If{$\hat{y} \neq y_i$}
+    \State $\mathbf{w} \gets \mathbf{w} + y_i\mathbf{x}_i$
+\EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+Assume there exists an optimal hyperplane $\mathbf{w}_{\text{opt}}, \|\mathbf{w}_{\text{opt}}\|_2=1$ and some $\gamma >0$ such that $y_i\cdot (\mathbf{w}_{\text{opt}}^T\mathbf{x}_i) \geq \gamma, \forall i \in \{1, 2, \dots, n\}$. Additionally, assume $\|\mathbf{x}_i\|_2 \leq R$, $\forall i \in \{1, 2, ..., n\}$ for some $R>0$. Following the steps below, show that the perceptron algorithm makes at most $\dfrac{R^2}{\gamma^2}$ errors, and therefore the algorithm must converge.
+
+% Some break down
+\textbf{1.1} (\blue{7pts}) Show that if the algorithm makes a mistake, the update rule moves the parameter $\mathbf{w}$ towards the direction of the optimal weights $\mathbf{w}_{\text{opt}}$. Specifically, denoting explicitly the updating iteration index by $k$, the current weight
+vector by $\mathbf{w}_k$, and the updated weight vector by $\mathbf{w}_{k+1}$, show that, if $y_i(\mathbf{w}_{k}^T\mathbf{x}_i) < 0$ where $(\mathbf{x}_i,y_i)$ is the instance selected in this iteration, we have
+\begin{equation}
+    \mathbf{w}_{k+1}^T\mathbf{w}_{\text{opt}} \geq \mathbf{w}_{k}^T\mathbf{w}_{\text{opt}} + \gamma \|\mathbf{w}_{\text{opt}}\|_2.
+\end{equation}
+
+\textbf{1.2} (\blue{5pts}) Show that the length of updated weights does not increase by a large amount. In particular, show that if $y_i(\mathbf{w}_{k}^T\mathbf{x}_i) < 0$, then
+\begin{equation}
+    \|\mathbf{w}_{k+1}\|_2^2 \leq \|\mathbf{w}_k\|_2^2+R^2.
+\end{equation}
+
+
+\textbf{1.3} (\blue{6pts}) Assume that the initial weight vector $\mathbf{w}_{0}=\mathbf{0}$ (an all-zero vector). Using results from the previous two parts, show that for any iteration $k+1$, with $M$ being the total number of mistakes the algorithm has made for the first $k$ iterations, we have
+\begin{equation}
+    \gamma M \leq \|\mathbf{w}_{k+1}\|_2 \leq R\sqrt{M}.
+\end{equation}
+
+\emph{Hint: use the Cauchy-Schwartz inequality: $\mathbf{a}^T\mathbf{b}\leq \|\mathbf{a}\|_2 \|\mathbf{b}\|_2$.}\\
+
+
+\textbf{1.4} (\blue{2pts}) Use \textbf{1.3} to conclude that $M \leq {R^2}/{\gamma^2}$. Therefore the algorithm can make at most ${R^2}/{\gamma^2}$ mistakes (note that there is no direct dependence on the dimensionality of the data points).

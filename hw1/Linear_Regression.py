@@ -3,6 +3,7 @@ import json
 import collections
 import matplotlib.pyplot as plt
 
+#collaborators: Zhenglong Liu, Zhiyuan Jin
 
 np.random.seed(42) ## random seed fixed 
 
@@ -95,6 +96,19 @@ def gradient_descent(X, y, lr_set, N_iteration):
 			losses.append(loss)         #append 20 losses for 20 iterations
 		results[lr] = losses
 		print(f"Final objective value for learning rate {lr}: {losses[-1]}")
+
+	plt.figure(figsize=(8,6))
+	
+	for lr, losses in results.items():
+		plt.plot(range(1, N_iteration + 1), losses, label=f"learning rate={lr}")
+	plt.yscale("log")   #Gradient explosion, use log scale for better visualization
+	plt.xlabel("Iteration")
+	plt.ylabel("Objective F(w)")
+	plt.title("Gradient Descent on Squared Error")
+	plt.legend()
+	plt.grid()
+	plt.show()
+
 	return results
 
 	################################
@@ -118,7 +132,46 @@ def stochastic_gradient_descent(X,y,lr_set,N_iteration):
 	##     Write your code here   ##
 	#lr_set = [0.0005, 0.005, 0.01]
 	#N_iteration = 1000
+	#fi(w) = 2(w^Tx_i - y_i)x_i
+	n, d = X.shape  		# get n and d from X
+	results = {}
+	for lr in lr_set:
+		w = np.zeros((d, 1))    # re-initialize w for each learning rate
+		losses = []
+
+		for iteration in range(N_iteration):
+			i = np.random.randint(n)  # Randomly sample an index
+			x_i = X[i].reshape(-1, 1)  # Get the i-th data point and reshape to clomn vector
+			y_i = y[i]                 # Get the corresponding label
+
+			prediction_i = w.T.dot(x_i)  # Prediction for the i-th
+			error_i = prediction_i - y_i  # Error for the i-th
+			gradient_i = 2 * error_i * x_i  # Stochastic gradient
+
+			#SGD update
+			w = w - lr * gradient_i
+			loss = square_loss(w, X, y)
+			losses.append(loss)
+		results[lr] = losses
+		print(f"Final objective value for learning rate {lr}: {losses[-1]}")
+
+	plt.figure(figsize=(8,6))
 	
+	for lr, losses in results.items():
+		plt.plot(range(1, N_iteration + 1), losses, label=f"learning rate={lr}")
+	plt.yscale("log")   #Gradient explosion, use log scale for better visualization
+	plt.xlabel("Iteration")
+	plt.ylabel("Objective F(w)")
+	plt.title("Stochastic Gradient Descent on Squared Error")
+	plt.legend()
+	plt.grid()
+	plt.show()
+
+	best_lr = min(results, key=lambda lr: results[lr][-1])
+	best_loss = results[best_lr][-1]
+	print(f"Best learning rate: {best_lr} with final objective value: {best_loss}")
+
+	return results
 
 	################################
 
@@ -144,19 +197,14 @@ def main():
 	lr_set = [0.00005, 0.0005, 0.0007] #oversmall, normal, explosion
 	w_0 = np.zeros((d,1))
 	N_iter = 20
-	results_1 = gradient_descent(X,y,lr_set,N_iter)
-
-	plt.figure(figsize=(8,6))
-	for lr, losses in results_1.items():
-		plt.plot(losses, label=f"learning rate={lr}")
+	#results_1 = #
+	gradient_descent(X,y,lr_set,N_iter)
 	
-	plt.yscale("log")   #Gradient explosion, use log scale for better visualization
-	plt.xlabel("Iteration")
-	plt.ylabel("Objective F(w)")
-	plt.title("Gradient Descent on Squared Error")
-	plt.legend()
-	plt.grid()
-	plt.show()
+	#comment#:“ From the experimental results, smaller step sizes produce smooth but very slow decreases in the objective value across iterations.
+	#Moderate step sizes converge much faster and achieve a lower final squared error within the same number of iterations.
+	#When the step size becomes too large, the objective value oscillates and may even increase, indicating unstable updates. even diverge.
+	#This shows that an appropriate step size is crucial for balancing convergence speed and stability in gradient descent.
+	#It provides the best trade-off between speed and stability.” #comment#
 
 	### Problem 4.3 (Stochastic Gradient Descent) ###
 	### You can plot more options of lr_set if necessary
@@ -164,6 +212,12 @@ def main():
 	w_0 = np.zeros((d,1))
 	N_iter = 1000
 	stochastic_gradient_descent(X,y,lr_set,N_iter)
+
+	#comment#:“The step size still plays an important role in stochastic gradient descent: a small step size leads to slow but stable progress,
+	# while a larger step size can speed up convergence but introduces noticeable oscillations in the loss curve. Comparing the loss curves of SGD and batch gradient descent,
+	# we observe that both methods follow a similar overall decreasing trend, but the GD curve is much smoother since it uses the full dataset at each update. 
+	# In contrast, the SGD curve is noisier due to random sampling, but it benefits from running many more updates (1000 iterations), which causes its final objective value to decrease much further in magnitude. 
+	# As a result, despite the higher variance, SGD achieves a significantly lower final loss mainly because it performs many more updates.” #comment#
 
 
 if __name__ == "__main__":

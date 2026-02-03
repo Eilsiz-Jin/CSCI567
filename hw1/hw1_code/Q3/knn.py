@@ -2,6 +2,8 @@ import numpy as np
 import json
 import collections
 import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 def data_processing(data):
 	train_set, valid_set, test_set = data['train_data'], data['val_data'], data['test_data']
@@ -171,9 +173,6 @@ def find_best_k(K, ytrain, dists, yval):
 	- validation_error: A list of error rate of different ks in K.
 	- best_err: The lowest error rate we get from all ks in K.
 	"""
-	#####################################################
-	#				 YOUR CODE HERE					    #
-	#####################################################
 	best_err = 1.0
 	validation_error = []
 	best_k = K[0]
@@ -253,8 +252,33 @@ def main():
 	#======performance of different k in training set=====
 	K = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18]
 
-	# To-do
-	# Draw two curves with matplotlib
+	dists = compute_l2_distances(Xtrain, Xtrain)
+	train_err = []
+	for k in K:
+		ypred_train = predict_labels(k, ytrain, dists)
+		err_train = compute_error_rate(ytrain, ypred_train)
+		train_err.append(err_train)
+
+	plt.plot(K, train_err, marker='o', label='Training Error Rate')
+	plt.xlabel('k')
+	plt.ylabel('Error Rate')
+	plt.title('Training Error Rate vs k')
+	plt.savefig('Train_Error_vs_k.png')
+	plt.close()
+
+	dists = compute_l2_distances(Xtrain, Xval)
+	train_err = []
+	for k in K:
+		ypred_train = predict_labels(k, ytrain, dists)
+		err_train = compute_error_rate(yval, ypred_train)
+		train_err.append(err_train)
+
+	plt.plot(K, train_err, marker='o', label='Validation Error Rate')
+	plt.xlabel('k')
+	plt.ylabel('Error Rate')
+	plt.savefig('Val_Error_vs_k.png')
+	plt.close()
+
 	
 	#==========select the best k by using validation set==============
 	dists = compute_l2_distances(Xtrain, Xval)

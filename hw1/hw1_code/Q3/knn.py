@@ -45,17 +45,15 @@ def data_processing_with_transformation(data, do_minmax_scaling=True, do_normali
 
 	# Min-Max scaling
 	if do_minmax_scaling:
-		pass
-		#####################################################
-		#				 YOUR CODE HERE					    #
-		#####################################################
+		min = Xtrain.min(axis=0)
+		max = Xtrain.max(axis=0)
+		Xtrain = (Xtrain - min) / (max - min + 1e-6)
+		Xval = (Xval - min) / (max - min + 1e-6)
+		Xtest = (Xtest - min) / (max - min + 1e-6)
 
 	# Normalization
 	def normalization(x):
-		#####################################################
-		#				 YOUR CODE HERE					    #
-		#####################################################
-		return
+		return x / (np.linalg.norm(x, axis=0) + 1e-6)
 	
 	if do_normalization:
 		Xtrain = normalization(Xtrain)
@@ -77,9 +75,12 @@ def compute_l2_distances(Xtrain, X):
 	  is the Euclidean distance between the ith test point and the jth training
 	  point.
 	"""
-	#####################################################
-	#				 YOUR CODE HERE					    #
-	#####################################################
+	num_train = Xtrain.shape[0]
+	num_test = X.shape[0]
+	dists = np.zeros((num_test, num_train))
+	for i in range(num_test):
+		for j in range(num_train):
+			dists[i][j] = np.sqrt(np.sum((X[i] - Xtrain[j]) ** 2))
 	return dists
 
 
@@ -115,9 +116,14 @@ def predict_labels(k, ytrain, dists):
 	- ypred: A numpy array of shape (num_test,) containing predicted labels for the
 	  test data, where y[i] is the predicted label for the test point X[i].
 	"""
-	#####################################################
-	#				 YOUR CODE HERE					    #
-	#####################################################
+	num_test = dists.shape[0]
+	ypred = np.zeros(num_test, dtype=int)
+	sorted_indices = np.argsort(dists, axis=1)
+	first_k_indices = sorted_indices[:, :k]
+
+	for i in range(num_test):
+		ytrain_k = ytrain[first_k_indices[i]]
+		ypred[i] = np.bincount(ytrain_k).argmax()
 	return ypred
 
 
@@ -132,9 +138,12 @@ def compute_error_rate(y, ypred):
 	Returns:
 	- err: The error rate of prediction (scalar).
 	"""
-	#####################################################
-	#				 YOUR CODE HERE					    #
-	#####################################################
+	total = len(y)
+	error_num = 0
+	for i in range(total):
+		if y[i] != ypred[i]:
+			error_num += 1
+	err = (error_num / total)
 	return err
 
 
@@ -221,32 +230,32 @@ def main():
 	print("The validation error rate is", err, "in Problem Set 1.3, which use cosine distance")
 	print()
 
-	#==================Problem Set 1.4=======================
-	# Compute distance matrix
-	Xtrain, ytrain, Xval, yval, Xtest, ytest = data_processing(data)
+	# #==================Problem Set 1.4=======================
+	# # Compute distance matrix
+	# Xtrain, ytrain, Xval, yval, Xtest, ytest = data_processing(data)
 
-	#======performance of different k in training set=====
-	K = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18]
-	#####################################################
-	#				 YOUR CODE HERE					    #
-	#####################################################
+	# #======performance of different k in training set=====
+	# K = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+	# #####################################################
+	# #				 YOUR CODE HERE					    #
+	# #####################################################
 	
-	#==========select the best k by using validation set==============
-	dists = compute_l2_distances(Xtrain, Xval)
-	best_k, validation_error, best_err = find_best_k(K, ytrain, dists, yval)
+	# #==========select the best k by using validation set==============
+	# dists = compute_l2_distances(Xtrain, Xval)
+	# best_k, validation_error, best_err = find_best_k(K, ytrain, dists, yval)
 
-	#===============test the performance with your best k=============
-	dists = compute_l2_distances(Xtrain, Xtest)
-	ypred = predict_labels(best_k, ytrain, dists)
-	test_err = compute_error_rate(ytest, ypred)
-	print("In Problem Set 1.4, we use the best k = ", best_k, "with the best validation error rate", best_err)
-	print("Using the best k, the final test error rate is", test_err)
-	#====================write your results to file===================
-	f=open(output_file, 'w')
-	for i in range(len(K)):
-		f.write('%d %.3f' % (K[i], validation_error[i])+'\n')
-	f.write('%s %.3f' % ('test', test_err))
-	f.close()
+	# #===============test the performance with your best k=============
+	# dists = compute_l2_distances(Xtrain, Xtest)
+	# ypred = predict_labels(best_k, ytrain, dists)
+	# test_err = compute_error_rate(ytest, ypred)
+	# print("In Problem Set 1.4, we use the best k = ", best_k, "with the best validation error rate", best_err)
+	# print("Using the best k, the final test error rate is", test_err)
+	# #====================write your results to file===================
+	# f=open(output_file, 'w')
+	# for i in range(len(K)):
+	# 	f.write('%d %.3f' % (K[i], validation_error[i])+'\n')
+	# f.write('%s %.3f' % ('test', test_err))
+	# f.close()
 
 if __name__ == "__main__":
 	main()

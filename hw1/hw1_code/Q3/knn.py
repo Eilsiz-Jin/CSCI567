@@ -1,7 +1,7 @@
 import numpy as np
 import json
 import collections
-
+import matplotlib
 
 def data_processing(data):
 	train_set, valid_set, test_set = data['train_data'], data['val_data'], data['test_data']
@@ -96,9 +96,16 @@ def compute_cosine_distances(Xtrain, X):
 	  is the Cosine distance between the ith test point and the jth training
 	  point.
 	"""
-	#####################################################
-	#				 YOUR CODE HERE					    #
-	#####################################################
+	num_test = X.shape[0]
+	num_train = Xtrain.shape[0]
+	dists = np.zeros((num_test, num_train))
+	# breakpoint()
+	for i in range(num_test):
+		for j in range(num_train):
+			if np.linalg.norm(X[i]) == 0 or np.linalg.norm(Xtrain[j]) == 0:
+				dists[i][j] = 1
+			else:
+				dists[i][j] = 1 - np.dot(X[i], Xtrain[j]) / (np.linalg.norm(X[i]) * np.linalg.norm(Xtrain[j]) + 1e-6)
 	return dists
 
 
@@ -167,6 +174,16 @@ def find_best_k(K, ytrain, dists, yval):
 	#####################################################
 	#				 YOUR CODE HERE					    #
 	#####################################################
+	best_err = 1.0
+	validation_error = []
+	best_k = K[0]
+	for k in K:
+		ypred = predict_labels(k, ytrain, dists)
+		err = compute_error_rate(yval, ypred)
+		validation_error.append(err)
+		if err < best_err:
+			best_err = err
+			best_k = k
 	return best_k, validation_error, best_err
 
 
@@ -222,7 +239,6 @@ def main():
 	# Compute distance matrix
 	Xtrain, ytrain, Xval, yval, Xtest, ytest = data_processing(data)
 	dists = compute_cosine_distances(Xtrain, Xval)
-
 	# Compute validation accuracy when k=4
 	k = 4
 	ypred = predict_labels(k, ytrain, dists)
@@ -230,32 +246,31 @@ def main():
 	print("The validation error rate is", err, "in Problem Set 1.3, which use cosine distance")
 	print()
 
-	# #==================Problem Set 1.4=======================
-	# # Compute distance matrix
-	# Xtrain, ytrain, Xval, yval, Xtest, ytest = data_processing(data)
+	#==================Problem Set 1.4=======================
+	# Compute distance matrix
+	Xtrain, ytrain, Xval, yval, Xtest, ytest = data_processing(data)
 
-	# #======performance of different k in training set=====
-	# K = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18]
-	# #####################################################
-	# #				 YOUR CODE HERE					    #
-	# #####################################################
+	#======performance of different k in training set=====
+	K = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+
+	# To-do
+	# Draw two curves with matplotlib
 	
-	# #==========select the best k by using validation set==============
-	# dists = compute_l2_distances(Xtrain, Xval)
-	# best_k, validation_error, best_err = find_best_k(K, ytrain, dists, yval)
-
-	# #===============test the performance with your best k=============
-	# dists = compute_l2_distances(Xtrain, Xtest)
-	# ypred = predict_labels(best_k, ytrain, dists)
-	# test_err = compute_error_rate(ytest, ypred)
-	# print("In Problem Set 1.4, we use the best k = ", best_k, "with the best validation error rate", best_err)
-	# print("Using the best k, the final test error rate is", test_err)
-	# #====================write your results to file===================
-	# f=open(output_file, 'w')
-	# for i in range(len(K)):
-	# 	f.write('%d %.3f' % (K[i], validation_error[i])+'\n')
-	# f.write('%s %.3f' % ('test', test_err))
-	# f.close()
+	#==========select the best k by using validation set==============
+	dists = compute_l2_distances(Xtrain, Xval)
+	best_k, validation_error, best_err = find_best_k(K, ytrain, dists, yval)
+	#===============test the performance with your best k=============
+	dists = compute_l2_distances(Xtrain, Xtest)
+	ypred = predict_labels(best_k, ytrain, dists)
+	test_err = compute_error_rate(ytest, ypred)
+	print("In Problem Set 1.4, we use the best k = ", best_k, "with the best validation error rate", best_err)
+	print("Using the best k, the final test error rate is", test_err)
+	#====================write your results to file===================
+	f=open(output_file, 'w')
+	for i in range(len(K)):
+		f.write('%d %.3f' % (K[i], validation_error[i])+'\n')
+	f.write('%s %.3f' % ('test', test_err))
+	f.close()
 
 if __name__ == "__main__":
 	main()

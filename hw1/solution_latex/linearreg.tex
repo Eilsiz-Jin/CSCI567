@@ -1,0 +1,132 @@
+% \textbf{Review} In the lectures, we have described the least mean square solution for linear regression as 
+% \begin{equation}
+%     w^* = (\tilde{X}^T \tilde{X}) \tilde{X}^T y
+% \end{equation}
+
+% where $\tilde{X}$ is the design matrix (N rows, D+1 columns) and y is the N-dimensional column vector of the true values in the training data $\mathcal{D}= \{(x_n,y_n)\}_{n=1}^N$.
+
+
+% \textbf{1.1} We mentioned a practical challenge for linear regression: when $\tilde{X}^T\tilde{X}$ is not invertible. Please use a concise mathematical statement (\emph{in one sentence}) to summarize the relationship between the training data $\hat{X}$ and the dimensionality of $w$ when this bad scenario happens. Then use this statement to explain why this scenario must happen when $N < D + 1$.
+
+We will consider the problem of fitting a linear model. Given
+$d$-dimensional input data
+$\textbf{x}_1,\dotsb, \textbf{x}_n \in \mathbb{R}^d$ with
+real-valued labels $y_1,\dotsb, y_n \in \mathbb{R}$, the goal
+is to find the coefficient vector $\textbf{w}$ that minimizes the sum
+of the squared errors.  The total squared error of \textbf{w} can be
+written as
+%$f(\mathbf{w})=\sum_{i=1}^{n}(\mathbf{w^T x_i}-y_i)^2$,
+%which is the same as the sum
+$F(\mathbf{w})=\sum_{i=1}^{n}f_i(\mathbf{w})$, where
+$f_i(\mathbf{w})=(\mathbf{w^T x_i}-y_i)^2$ denotes the
+squared error of the $i$th data point. We will refer to $F(\w)$ as the \emph{objective function} for the problem.\\
+
+The data in this problem will be drawn from the following linear
+model.  For the training data, we select $n$ data points
+$\textbf{x}_1,\dotsb, \textbf{x}_n$, each drawn independently
+from a $d$-dimensional Gaussian distribution.  We then pick
+the ``true'' coefficient vector $\mathbf{w}^*$ (again from a
+$d$-dimensional Gaussian), and give each training point
+$\mathbf{x}_i$ a label equal to $(\mathbf{w}^*)^{\top}\mathbf{x}_i$
+plus some noise (which is drawn from a
+1-dimensional Gaussian distribution).\\
+%, and
+%corresponding $y$ values $y^{(1)},\dotsb, y^{(n)}$ with $y_i$ set
+%to be a linear function of $\textbf{x}_i$ with some independent
+%Gaussian noise.\\ 
+
+The following Python code can be found in your starter code and will generate the data used in this problem.
+
+\begin{verbatim}
+d = 100 # dimensions of data
+n = 1000 # number of data points
+X = np.random.normal(0,1, size=(n,d))
+w_true = np.random.normal(0,1, size=(d,1))
+y = X.dot(w_true) + np.random.normal(0,0.5,size=(n,1))
+\end{verbatim}
+
+\textbf{Part 4.1} (\blue{6pts}) Least-squares regression has the closed form solution $\textbf{w}_{LS} =
+\mathbf{(X^TX)^{-1}X^Ty}$, which minimizes the squared error on the
+data. 
+(Here $\mathbf{X}$ is the $n \times d$ data matrix as in the code
+above, with one row per data point, and $\mathbf{y}$ is the $n$-vector
+of their labels.)
+Solve for $\textbf{w}_{LS}$ on the training data and report the value of the objective function $F(\w_{LS})$.  For comparison, what is the 
+%test 
+%set error 
+total squared error $F(\w)$ if you just set $\textbf{w}$ to be the all 0's vector? Using similar Python code, draw $n=1000$ test data points from the same distribution, and report the total squared error of $\w_{LS}$ on these test points. What is the gap in the training and test objective function values? Comment on the result. \\
+
+Note: Computing the closed-form solution requires time
+$O(nd^2 + d^3)$, which is slow for large $d$. Although gradient
+descent methods will not yield an exact solution, they do give a
+close approximation in much less time. For the purpose of this
+assignment, you can use the closed form solution as a good sanity
+check in the following parts.\\
+
+\textit{Comment:} The outputs of the least-squares model are 
+$F(w_{\text{LS}}^{\text{test}}) = 294.06$ and 
+$F(w_{\text{LS}}^{\text{train}}) = 217$. 
+The relatively small gap between the training error and the test error suggests that the model generalizes well to unseen data. 
+This behavior is expected for a well-specified linear model trained with a sufficient amount of data.
+
+\bigskip
+\noindent \emph{Task}: Fill in the code for the function \colorbox{Gainsboro!60!Lavender}{closed\_form} and \colorbox{Gainsboro!60!Lavender}{square\_loss}. \\
+
+\textbf{Part 4.2} (\blue{7pts}) In this part, you will solve the same problem via
+  \emph{gradient descent} on the squared-error objective function
+  $F(\textbf{w})=\sum_{i=1}^n f_i(\textbf{w})$.  Recall that the gradient of a
+  sum of functions is the sum of their gradients.  Given a point
+  $\textbf{w}_t$, what is the gradient of $f$ at $\textbf{w}_t$?
+
+  Now use gradient descent to find a coefficient vector $\textbf{w}$ that 
+approximately minimizes the
+  least squares objective function over the training data. Run gradient descent
+  three times, once with each of the step sizes
+  $0.00005$, $0.0005$, and $0.0007$. You should initialize $\textbf{w}$ to be
+  the all-zero vector for all three runs. Plot the objective function
+  value for 20 iterations for all 3 step sizes on the same
+  graph. You can also have more graphs on separate step size if the curves with all 3 step sizes are hard to read. Comment in 3-4 sentences on how the step size can affect the
+  convergence of gradient descent (feel free to experiment with other
+  step sizes). Also report the step size among \{0.00005, 0.0005, 0.0007\} that had the best final
+  objective function value and the corresponding objective function value.\\
+
+\textit{Comment:} From the experimental results, smaller step sizes lead to smooth but very slow decreases in the objective value across iterations. 
+Moderate step sizes converge much faster and achieve a lower final squared error within the same number of iterations. 
+However, when the step size becomes too large, the objective value starts to oscillate and may even increase, indicating unstable updates or divergence. 
+These observations demonstrate that choosing an appropriate step size is crucial for balancing convergence speed and stability in gradient descent, as it provides the best trade-off between fast convergence and numerical stability.
+
+\bigskip
+  \noindent \emph{Task}: Fill in the code for the function \colorbox{Gainsboro!60!Lavender}{gradient\_descent}. You may want to plot the curves for a subset of the step sizes to make the curves distinguishable. \\
+
+\textbf{Part 4.3} (\blue{7pts})
+In this part you will run \emph{stochastic gradient descent} to solve the same problem.  Recall that in stochastic gradient descent, you pick one training datapoint at a time, say $(\textbf{x}_i,y_i)$, and update your current value of $\textbf{w}$ according to the gradient of $f_i(\mathbf{w})=(\mathbf{w^T x_i}-y_i)^2$. \\
+
+Run stochastic gradient descent using step sizes
+$\{0.0005, 0.005, 0.01\}$ and 1000 iterations. You should initialize $\mathbf{w}$ to be the all-zero vector for all three runs. Plot the objective
+function value vs. the iteration number for all 3 step sizes on the
+same graph. Comment 3-4 sentences on how the step size can affect the
+convergence of stochastic gradient descent and how it compares to
+gradient descent. Compare the performance of the two methods. How do
+the best final objective function values compare? How many times does
+each algorithm use each data point? Also report the step size that had
+the best final objective function value and the
+corresponding objective function value.\\
+
+\textit{Comment:} The step size continues to play an important role in stochastic gradient descent (SGD). 
+A small step size results in slow but stable progress, whereas a larger step size accelerates convergence at the cost of noticeable oscillations in the loss curve. 
+When comparing the loss curves of SGD and batch gradient descent, both methods exhibit a similar overall decreasing trend. 
+However, the gradient descent curve is much smoother because it uses the full dataset for each update. 
+In contrast, the SGD curve is noisier due to random sampling, but it benefits from performing a much larger number of updates (1000 iterations). 
+As a result, despite its higher variance, SGD achieves a significantly lower final loss, primarily because it carries out many more parameter updates.
+
+
+\bigskip
+\noindent \emph{Task}: Fill in the code for the function \colorbox{Gainsboro!60!Lavender}{stochastic\_gradient\_descent}. You may want to plot the curves for a subset of the step sizes to make the curves distinguishable. \\
+
+\iffalse
+\textbf{5.4} (\blue{0pts}) Include the code for all the previous parts in the submitted pdf file.
+\fi
+
+\textbf{Code submission}\\
+
+Make sure to include your complete filled-in code in the single zip file that you upload for all your codes for the HW.

@@ -3,7 +3,7 @@ import json
 import collections
 import matplotlib.pyplot as plt
 
-#collaborators: Zhenglong Liu, Zhiyuan Jin
+#collaborators: Zhenglong Liu: zhenglon@usc.edu, Zhiyuan Jin: jinzhiyu@usc.edu
 
 np.random.seed(42) ## random seed fixed 
 

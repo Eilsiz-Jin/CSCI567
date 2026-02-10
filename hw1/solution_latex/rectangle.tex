@@ -144,7 +144,57 @@ B_1, B_2, B_3, B_4 \subseteq B^*
 \mathbb{P}_D(B_i) = \frac{\epsilon}{4}, \quad i=1,2,3,4.
 \]
 
+Suppose that the training set S contains at least one positive example in each $B_i$. Then ERM must expand its rectangle to include these points, so
+\[
+B^*-B_S \subseteq \bigcup_{i=1}^4 B_i.
+\]
 
+\[
+R(f_S^{\mathrm{ERM}}) = \mathbb{P}_D(B^* - B_S) \le \sum_{i=1}^4 \mathbb{P}_D(B_i) = \epsilon.
+\]
+
+For any $B_i$, the probability that it contains no postive examples is: $1 - \frac{\epsilon}{4}$
+
+So using the inequality:
+\[
+1-x \le e^{-x}
+\]
+
+We have 
+
+\[
+\left(1 - \frac{\epsilon}{4}\right)^n \le e^{-n \epsilon /4},
+\]
+
+Define the bad event E as "at least one strip contains no sample":
+\[
+E = \bigcup_{i=1}^4 \{\text{no sample falls in } B_i\}.
+\]
+
+By the union bound,
+
+\[
+\mathbb{P}(E) \le \sum_{i=1}^4 e^{-n \epsilon /4} = 4 e^{-n \epsilon /4}.
+\]
+
+To ensure $\mathbb{P}(E) \le \delta$, we get
+\[
+4 e^{-n \epsilon /4} \le \delta \quad 
+\]
+
+\[
+\quad n \ge \frac{4 \log(4/\delta)}{\epsilon}.
+\]
+
+Therefore,  if the number of training samples satisfies 
+\[
+\quad n \ge \frac{4 \log(4/\delta)}{\epsilon}.
+\]
+
+Then with probability at least $1- \delta$, each of the four strips $B_i$ contains at least one training point. The ERM rectangle $B_S$ satisfies 
+\[
+R(f_S^{\mathrm{ERM}}) \le \epsilon.
+\]
 
 \bigskip
 

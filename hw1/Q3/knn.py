@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import collections
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -47,15 +48,22 @@ def data_processing_with_transformation(data, do_minmax_scaling=True, do_normali
 
 	# Min-Max scaling
 	if do_minmax_scaling:
+		#####################################################
+		#				 YOUR CODE HERE					    #
+		
 		min = Xtrain.min(axis=0)
 		max = Xtrain.max(axis=0)
 		Xtrain = (Xtrain - min) / (max - min + 1e-6)
 		Xval = (Xval - min) / (max - min + 1e-6)
 		Xtest = (Xtest - min) / (max - min + 1e-6)
+		#####################################################
 
 	# Normalization
 	def normalization(x):
-		return x / (np.linalg.norm(x, axis=0) + 1e-6)
+		#####################################################
+		#				 YOUR CODE HERE					    #
+		return x / (np.linalg.norm(x, axis=1, keepdims=True) + 1e-6)
+		#####################################################
 	
 	if do_normalization:
 		Xtrain = normalization(Xtrain)
@@ -77,12 +85,16 @@ def compute_l2_distances(Xtrain, X):
 	  is the Euclidean distance between the ith test point and the jth training
 	  point.
 	"""
+	#####################################################
+	#				 YOUR CODE HERE					    #
+
 	num_train = Xtrain.shape[0]
 	num_test = X.shape[0]
 	dists = np.zeros((num_test, num_train))
 	for i in range(num_test):
 		for j in range(num_train):
 			dists[i][j] = np.sqrt(np.sum((X[i] - Xtrain[j]) ** 2))
+	#####################################################
 	return dists
 
 
@@ -98,6 +110,8 @@ def compute_cosine_distances(Xtrain, X):
 	  is the Cosine distance between the ith test point and the jth training
 	  point.
 	"""
+	#####################################################
+	#				 YOUR CODE HERE					    #
 	num_test = X.shape[0]
 	num_train = Xtrain.shape[0]
 	dists = np.zeros((num_test, num_train))
@@ -108,6 +122,7 @@ def compute_cosine_distances(Xtrain, X):
 				dists[i][j] = 1
 			else:
 				dists[i][j] = 1 - np.dot(X[i], Xtrain[j]) / (np.linalg.norm(X[i]) * np.linalg.norm(Xtrain[j]) + 1e-6)
+	#####################################################
 	return dists
 
 
@@ -125,6 +140,8 @@ def predict_labels(k, ytrain, dists):
 	- ypred: A numpy array of shape (num_test,) containing predicted labels for the
 	  test data, where y[i] is the predicted label for the test point X[i].
 	"""
+	#####################################################
+	#				 YOUR CODE HERE					    #
 	num_test = dists.shape[0]
 	ypred = np.zeros(num_test, dtype=int)
 	sorted_indices = np.argsort(dists, axis=1)
@@ -133,6 +150,7 @@ def predict_labels(k, ytrain, dists):
 	for i in range(num_test):
 		ytrain_k = ytrain[first_k_indices[i]]
 		ypred[i] = np.bincount(ytrain_k).argmax()
+	#####################################################
 	return ypred
 
 
@@ -147,12 +165,15 @@ def compute_error_rate(y, ypred):
 	Returns:
 	- err: The error rate of prediction (scalar).
 	"""
+	#####################################################
+	#				 YOUR CODE HERE					    #
 	total = len(y)
 	error_num = 0
 	for i in range(total):
 		if y[i] != ypred[i]:
 			error_num += 1
 	err = (error_num / total)
+	#####################################################
 	return err
 
 
@@ -173,6 +194,8 @@ def find_best_k(K, ytrain, dists, yval):
 	- validation_error: A list of error rate of different ks in K.
 	- best_err: The lowest error rate we get from all ks in K.
 	"""
+	#####################################################
+	#				 YOUR CODE HERE					    #
 	best_err = 1.0
 	validation_error = []
 	best_k = K[0]
@@ -183,6 +206,7 @@ def find_best_k(K, ytrain, dists, yval):
 		if err < best_err:
 			best_err = err
 			best_k = k
+	#####################################################
 	return best_k, validation_error, best_err
 
 
@@ -206,6 +230,9 @@ def main():
 	err = compute_error_rate(yval, ypred)
 	print("The validation error rate is", err, "in Problem Set 1.1")
 	print()
+
+	#comment#: 
+	# The validation error rate is 0.07692307692307693 (7.69%) when k = 4 using Euclidean distance.
 
 	#==================Problem Set 1.2=======================
 
@@ -233,11 +260,15 @@ def main():
 	print("The validation error rate is", err, "in Problem Set 1.2 when using minmax_scaling")
 	print()
 	
+	#comment#: 
+	# The validation error rate is 0.04395604395604396 (4.40%) in Problem Set 1.2 when using normalization
+	# The validation error rate is 0.05494505494505494 (5.49%) in Problem Set 1.2 when using minmax_scaling
 	#==================Problem Set 1.3=======================
 
 	# Compute distance matrix
 	Xtrain, ytrain, Xval, yval, Xtest, ytest = data_processing(data)
 	dists = compute_cosine_distances(Xtrain, Xval)
+
 	# Compute validation accuracy when k=4
 	k = 4
 	ypred = predict_labels(k, ytrain, dists)
@@ -245,12 +276,16 @@ def main():
 	print("The validation error rate is", err, "in Problem Set 1.3, which use cosine distance")
 	print()
 
+	#comment#: 
+	# The validation error rate is 0.04395604395604396 (4.40%) in Problem Set 1.3, which use cosine distance
 	#==================Problem Set 1.4=======================
 	# Compute distance matrix
 	Xtrain, ytrain, Xval, yval, Xtest, ytest = data_processing(data)
 
 	#======performance of different k in training set=====
 	K = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+	#####################################################
+	#				 YOUR CODE HERE					    #
 
 	dists = compute_l2_distances(Xtrain, Xtrain)
 	train_err = []
@@ -278,11 +313,12 @@ def main():
 	plt.ylabel('Error Rate')
 	plt.savefig('Val_Error_vs_k.png')
 	plt.close()
+	#####################################################
 
-	
 	#==========select the best k by using validation set==============
 	dists = compute_l2_distances(Xtrain, Xval)
 	best_k, validation_error, best_err = find_best_k(K, ytrain, dists, yval)
+
 	#===============test the performance with your best k=============
 	dists = compute_l2_distances(Xtrain, Xtest)
 	ypred = predict_labels(best_k, ytrain, dists)
@@ -295,6 +331,16 @@ def main():
 		f.write('%d %.3f' % (K[i], validation_error[i])+'\n')
 	f.write('%s %.3f' % ('test', test_err))
 	f.close()
+
+	#comment#:
+	# 1) The error rate generally shows an upward trend as k increases on the training set.
+	# 2) The Best k is 6 on validation set.
+	# 3) On the training set, erorr rate becomes worse when k is bigger. But on validation set, the error rate shows a trend of first decreasing and then increasing as k increases. 
+	# 4) The final test set error rate is 0.07100591715976332 (7.10%) when k is 6 (best-k).
+	# 5) As k increases, the training error monotonically increases because the KNN classifier becomes less flexible and the decision boundary becomes smoother, leading to underfitting.
+	# The validation error first decreases and then increases as k grows. For small k, the model overfits the training data and generalizes poorly to unseen data. For large k, the model becomes too simple and fails to capture the underlying structure of the data, resulting in underfitting.
+	# The validation set is used for hyper-parameter tuning because it provides an unbiased estimate of generalization performance, while the training set error is optimistically biased.
+	# By selecting k based on the minimum validation error, we achieve a good balance between overfitting and underfitting, leading to better generalization performance on the test set.
 
 if __name__ == "__main__":
 	main()

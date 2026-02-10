@@ -131,21 +131,6 @@ that generalization is inherently a probabilistic statement.
 
 \noindent{\fontsize{11}{12}\selectfont\textbf{Solution 2.3}}
 
-According to 2.1, We have:
-\[
-B_S \subseteq B^*
-\]
-
-If $S$ contains (positive) examples in all of $B_1, B_2, B_3, B_4$, and we define them as four strips along the edges of $B^*$, So we have:
-\[
-B_1, B_2, B_3, B_4 \subseteq B^*
-\]
-\[
-\mathbb{P}_D(B_i) = \frac{\epsilon}{4}, \quad i=1,2,3,4.
-\]
-
-
-
 \bigskip
 
 \textbf{(Bonus) 2.4} (\blue{8pts}) Repeat the previous question for the function class of axis-aligned rectangles in $\R^d$. Specifically, the current function class is $\mathcal{F}_{\text{d-rec}}=\{f_{(a_1,b_1,a_2,b_2,\dots,a_d,b_d)}(x_1,x_2,\dots,x_d):a_i\leq b_i, i\in\{1,2,\dots,d\}\}$ and a datapoint $\x\in\R^d$ is predicted to be $1$ by $f_{(a_1,b_1,a_2,b_2,\dots,a_d,b_d)}(x_1,x_2,\dots,x_d)$ if $a_i\leq x_i\leq b_i$ for all $i\in\{1,2,\dots,d\}$ and $-1$ otherwise. We will still assume realizability. To show this, try to generalize all the steps in the above question to higher dimensions, and find the number of training samples $n$ required to guarantee that $R(f_S^{ERM})\le \epsilon$ with probability at least $1-\delta$. \\

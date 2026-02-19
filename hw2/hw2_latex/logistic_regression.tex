@@ -1,0 +1,55 @@
+In this problem we will consider a simple binary classification task. We are given
+$d$-dimensional input data
+$\textbf{x}_1,\dotsb, \textbf{x}_n \in \mathbb{R}^d$ along with labels $y_1,\dotsb, y_n \in \{-1,\ +1\}$.  Our goal is to learn a linear classifier  $\text{sign}({\mathbf{w}^T}\mathbf{x})$ to classify the datapoints $\mathbf{x}$. We will find $\mathbf{w}$  by minimizing the logistic loss. The total logistic loss for any $\mathbf{w}$  can be
+written as
+$f(\mathbf{w})=\frac{1}{n}\sum_{i=1}^{n}f_i(\mathbf{w})$, where
+$f_i(\mathbf{w})=\log\big(1 + \exp({-y_i \mathbf{w^T x_i}})\big)$ denotes the
+logistic loss of the $i$th data point $(\mathbf{x}_i, y_i)$. We will refer to $f(\w)$ as the \emph{objective function} for the problem.\\
+
+Use the following Python code for generating the training data and test data. The data consists of points drawn from a Gaussian distribution with mean $[0.12, 0.12, ..., 0.12] \in \R^d$ for the class labelled as $+1$. Similarly, points are drawn from a Gaussian distribution with mean $[-0.12, -0.12, ..., -0.12] \in \R^d$ for the class labelled as $-1$. The data is then split such that 80\% of the points are in the training data and the remaining 20\% form the test data.
+
+\begin{verbatim}
+import numpy as np
+
+np.random.seed(42)
+d = 100 # dimensions of data
+n = 1000 # number of data points
+hf_train_sz = int(0.8 * n//2)
+
+X_pos = np.random.normal(size=(n//2, d))
+X_pos = X_pos + .12
+
+X_neg = np.random.normal(size=(n//2, d))
+X_neg = X_neg - .12
+
+X_train = np.concatenate([X_pos[:hf_train_sz], 
+                          X_neg[:hf_train_sz]])
+X_test = np.concatenate([X_pos[hf_train_sz:], 
+                         X_neg[hf_train_sz:]])
+
+y_train = np.concatenate([np.ones(hf_train_sz), 
+                          -1 * np.ones(hf_train_sz)])
+y_test = np.concatenate([np.ones(n//2 - hf_train_sz), 
+                         -1 * np.ones(n//2 - hf_train_sz)])
+\end{verbatim}
+
+In this part you will implement and run \emph{stochastic gradient descent} (with a batch size of $b = 1$) to solve for the value of $\w$ that approximately minimizes $f(\w)$ over the training data. Recall that in stochastic gradient descent, you pick one training datapoint at random from the training data, say $(\textbf{x}_i,y_i)$, and update your current value of $\textbf{w}$ according to the gradient of $f_i(\mathbf{w})$. Run stochastic gradient descent for 5000 iterations using step sizes $\{0.0005, 0.005, 0.05\}$, initializing with the all zeros vector.\\
+
+\textbf{5.1} (\blue{4pts}) As the algorithm proceeds, compute the value of the objective function on the train and test data at each iteration. Plot the objective function value on the training data vs. the iteration number for all 3 step sizes. On the same graph, plot the objective function value on the test data vs. the iteration number for all 3 step sizes. (The deliverable is a single graph with 6 lines and a suitable legend). How do the objective function values on the train and test data relate with each other for different step sizes? Comment in 3-4 sentences.\\
+
+\textbf{5.2} (\blue{2pts}) So far in the problem, we've minimized the logistic loss on the data. However, remember from class that our actual goal with binary classification is to minimize the classification error given by the 0/1 loss, and logistic loss is just a surrogate loss function we work with. We will examine the average 0-1 loss on the test data in this part (note that the average 0-1 loss on the test data is just the fraction of test datapoints that are classified incorrectly). As the SGD algorithm proceeds, plot the average 0-1 loss on the test data vs.\ the iteration number for all 3 step sizes on the same graph. Also report the step size that had the lowest final 0-1 loss on the test set and the corresponding value of the 0-1 loss.\\
+
+\iffalse
+Remember that the logistic regression classifier describes a model $P[y = +1 | \x] = \sigma (\w^T\x)$. If we care about minimizing classification errors, this model can be used to classify a new datapoint by using a fixed threshold. We saw in HW1 Problem 2.3 that, when all classification errors have the same cost, the optimal threshold is of $0.5$. Concretely, the classifier predicts a label of $+1$ if $P[y = +1 | \x] \geq 0.5$ $\big($i.e. $\sigma (\w^T\x) \geq 0.5$ $\big)$ and a label of $-1$ otherwise. The accuracy of the classifier is the fraction of the datapoints that it labels correctly
+\begin{equation*}
+    accuracy = \frac{1}{n} \sum_{i=1}^n \mathbb{I}[\hat{y} = y_i] \qquad \text{where} \qquad \hat{y} = \begin{cases}
++1 \qquad \text{if }\, \sigma (\w^T\x) \geq 0.5 \\
+-1 \qquad otherwise
+\end{cases}
+\end{equation*}
+
+Notice that this is just 1 minus the 0/1 loss. As the SGD algorith proceeds, plot the classification accuracy on the test data vs. the iteration number for all 3 step sizes on the same graph. Also report the step size that had the best final test data accuracy and the corresponding value.\\
+\fi
+
+\textbf{5.3} (\blue{2pts}) Comment on how well the logistic loss act as a surrogate for the 0-1 loss.\\
+

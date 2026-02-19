@@ -1,0 +1,11 @@
+In this part, we will compare the behaviour of Logistic Regression to SVMs with Linear and Radial Basis Function (RBF) kernels. You can find the code on \url{https://vatsalsharan.github.io/spring26/cc_hw2.zip}.\\
+
+Take some time to understand the code. Running the code will create 3 datasets: MOON, CIRCLES and LINEARLY\_SEPARABLE, train 6 classifiers on each dataset, and generate a graph with $6 \times 7$ grid of scatter plots. The first column displays the data while the remaining columns display the learned decision boundary of 6 classifiers. The number in the bottom right of each plot shows the classifier accuracy. Odd rows correspond to the training data while even rows correspond to the test data for each dataset. For the following questions, explain your observations in 2-3 lines.\\
+
+\textbf{4.1} (\blue{2pts}) Notice that MOON and CIRCLES are not linearly separable. Do linear classifiers do well on these? How does SVM with RBF kernel do on these? Comment on the difference.\\
+
+\textbf{4.2} (\blue{2pts}) Try various values of the penalty term $C$ for the SVM with linear kernel. On the LINEARLY\_SEPARABLE dataset, how does the train and test set accuracy relate to $C$? On the LINEARLY\_SEPARABLE dataset, how does the decision boundary change?\\
+
+\textbf{4.3} (\blue{2pts}) Try various values of the penalty term $C$ for the SVM with RBF kernel. How does the train and test set accuracy relate to $C$? How does the decision boundary change?\\
+
+\textbf{4.4} (\blue{2pts}) Try various values of $C$ for Logistic Regression (Note: $C$ is the inverse regularization strength). Do you see any effect of regularization strength on Logistic Regression? Hint: Under what circumstances do you expect regularization to affect the behavior of a Logistic Regression classifier?\\

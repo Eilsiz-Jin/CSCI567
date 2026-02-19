@@ -1,0 +1,89 @@
+This problem is a continuation of the linear regression problem from the previous homework (HW1 Problem 5). Let us recall the setup. Given
+$d$-dimensional input data
+$\textbf{x}_1,\ldots, \textbf{x}_n \in \mathbb{R}^d$ with
+real-valued labels $y_1,\ldots, y_n \in \mathbb{R}$, the goal
+is to find the coefficient vector $\textbf{w}$ that minimizes the sum
+of the squared errors.  The total squared error of $\mathbf{w}$ can be
+written as
+$f(\mathbf{w})=\sum_{i=1}^{n}f_i(\mathbf{w})$, where
+$f_i(\mathbf{w})=(\mathbf{w^T x_i}-y_i)^2$ denotes the
+squared error of the $i$th data point. We will refer to $f(\w)$ as the \emph{objective function} for the problem.
+
+Last homework, we considered the scenario where the number of data points was much larger than the number of dimensions and
+hence we did not worry too much about generalization. (If you remember, the gap between training and test accuracies in 5.1 of the last HW was not too large).  We will
+now consider the setting where $d=n$, and examine the test error along
+with the training error. Use the following Python code for generating
+the training data and test data.
+
+\begin{verbatim}
+import numpy as np
+
+train_n = 100
+test_n = 1000
+d = 100
+
+X_train = np.random.normal(0,1, size=(train_n,d))
+w_true = np.random.normal(0,1, size=(d,1))
+y_train = X_train.dot(w_true) + np.random.normal(0,0.5,size=(train_n,1))
+
+X_test = np.random.normal(0,1, size=(test_n,d))
+y_test = X_test.dot(w_true) + np.random.normal(0,0.5,size=(test_n,1))
+
+\end{verbatim}
+
+\textbf{3.1} (\blue{2pts}) We will first setup a baseline, by finding the test
+  error of the linear regression solution
+  $\textbf{w}=\mathbf{X^{-1}y}$ without any regularization.  This is
+  the closed-form solution for the minimizer of the objective function
+  $f(\mathbf{w})$.  (Note the formula is simpler than what we saw in the last homework because
+  now $\mathbf{X}$ is square as $d=n$).  Report the training error and test
+  error of this approach, \emph{averaged over 10 trials}. For better
+  interpretability, report the normalized error
+  $\hat{f}(\textbf{w})$ rather than the value of the objective function
+  ${f}(\textbf{w})$, where we define $\hat{f}(\textbf{w})$ as
+\[ 
+\hat{f}(\textbf{w})=\frac{\parallel{\mathbf{Xw-y}}\parallel_2}{\parallel{\mathbf{y}}\parallel_2}.
+\]
+
+\emph{Note on averaging over multiple trials:} We're doing this to get a better estimate of the performance of the algorithm. To do this, simply run the entire process (including data generation, and sampling $w_{\text{true}}$) 10 times, and find the average value of $\hat{f}(\textbf{w})$ over these 10 trials. \\
+
+
+\textbf{3.2} (\blue{7pts}) We will now examine $\ell_2$ regularization as a means to prevent overfitting. The $\ell_2$ regularized objective function is given by the following expression:
+$$ \sum_{i=1}^{m} (\mathbf{w^T x_{i}}-{y}_{i})^2 + \lambda \| \mathbf{w}\|_2^2.$$
+As discussed in class, this has a closed-form solution
+$\textbf{w}=\mathbf{(X^TX+\lambda I)^{-1}X^Ty}$. Using this closed-form
+solution, present a plot of the normalized training error and
+normalized test error $\hat{f}(\textbf{w})$ for
+$\lambda = \{0.0005, 0.005, 0.05, 0.5, 5, 50, 500\}$. As before, you
+should average over 10 trials. Discuss the characteristics of your
+plot, and also compare it to your answer to~(\textbf{3.1}).\\
+
+\noindent \emph{The following questions explore the concept of implicit regularization. This is a very active topic of research, with the idea being that optimization algorithms such as SGD can themselves act like regularizers (in the sense that they prefer the solutions to the regularized problems instead of just the original problem). There's no one correct answer we're looking for in many of these questions, and idea is to make you think about what is happening and report your findings.}\\
+
+\textbf{3.3} (\blue{7pts}) Run stochastic gradient descent (SGD) on the original objective
+function $f(\mathbf{w})$, with the initial guess of $\textbf{w}$ set to be the all 0's vector.  Run SGD for 1,000,000 iterations for each different choice of the step size, $\{0.00005$, $0.0005$, $0.005\}$.  Report the
+ normalized training error and the normalized test
+error for each of these three settings, averaged over 10 trials. How does the SGD solution compare with the
+solutions obtained using $\ell_2$ regularization? Note that SGD is
+minimizing the original objective function, which does \emph{not} have any
+regularization. In Part (\textbf{3.1}) of this problem, we found the
+\emph{optimal} solution to the original objective function with
+respect to the training data. How does the training and test error of
+the SGD solutions compare with those of the solution in~(\textbf{3.1})? 
+Can you explain your observations?   (It may be helpful to also compute the normalized training and test error corresponding to the true coefficient vector $\textbf{w}^*$ for comparison, this is \verb|w_true| in the code.)\\
+
+\textbf{3.4} (\blue{10pts}) We will now examine the behavior of SGD in more detail. Let $\mathbf{w}^{(t)}$ refer to the SGD solution at the $t$-th iteration. For step sizes $\{0.00005,0.005\}$ and 1,000,000 iterations of SGD (and a single trial), 
+\begin{itemize}
+\item [(i)] Plot the normalized training error of the SGD iterate $\mathbf{w}^{(t)}$ vs.\ the iteration
+  number $t$. On the plot of training error, draw a line parallel to the
+  x-axis indicating the error $\hat{f}(\textbf{w}^*)$ of
+  the true model $\textbf{w}^*.$
+
+	\item [(ii)] Plot the normalized test error of the SGD iterate $\mathbf{w}^{(t)}$ vs.\ the iteration number $t$. Your code might take a long time to run if you compute the test error after every SGD step---feel free to compute the test error every 100 iterations of SGD to make the plots.
+	\item [(iii)] Plot the $\ell_2$ norm of the SGD iterate $\mathbf{w}^{(t)}$ vs.\
+ the iteration number $t$.
+
+\end{itemize}
+  Comment on the plots. What can you say about the generalization ability of SGD with different step sizes? Does the plot correspond to the intuition that a learning algorithm starts to overfit when the training error becomes too small, i.e. smaller than the noise level of the true model so that the model is fitting the noise in the data? How does the generalization ability of the final solution depend on the $\ell_2$ norm of the final solution?\\
+
+\textbf{3.5} (\blue{5pts}) We will now examine the effect of the starting point on the SGD solution. Fixing the step size at $0.00005$ and the maximum number of iterations at 1,000,000, choose the initial point randomly from the $d$-dimensional sphere with radius $r=\{0, 0.1, 0.5, 1, 10, 20, 30\}$ (to do this random initialization, you can sample from the standard Gaussian $N(0,\mathbf{I})$, and then renormalize the sampled point to have $\ell_2$ norm $r$). Plot the average normalized training error and the average normalized test error over 10 trials vs $r$. Comment on the results, in relation to the results from part (\textbf{3.2}) where you explored different $\ell_2$ regularization coefficients. Can you provide an explanation for the behavior seen in this plot?\\

@@ -1,0 +1,142 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage[shortlabels]{enumitem}
+\usepackage{hyperref}
+\usepackage{etoolbox}
+\usepackage{url}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage[svgnames]{xcolor}
+\DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\prob}{Pr}
+\newcommand{\calX}{{\mathcal{X}}}
+\newcommand{\calY}{{\mathcal{Y}}}
+\newcommand{\calH}{{\mathcal{H}}}
+\newcommand{\calF}{{\mathcal{F}}}
+\newcommand{\VC}{{\text{\rm VCdim}}}
+\newcommand{\blue}[1]{{\color{blue}#1}}
+\newcommand{\pink}[1]{{\color{magenta}#1}}
+\newcommand{\ans}[1]{{\color{violet}#1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\cbr}[1]{\left\{#1\right\}}
+\newcommand{\rbr}[1]{\left(#1\right)}
+\newcommand{\inner}[2]{\left\langle #1,#2 \right\rangle}
+\newcommand{\order}{\ensuremath{\mathcal{O}}}
+\newcommand{\sign}{{\text{\rm sign}}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\w}{\mathbf{w}}
+
+\setlength{\topmargin}{-.53in}
+\setlength{\textwidth}{6.5in}
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+\setlength{\textheight}{9in}
+\setlength{\marginparwidth}{1.2in}
+
+\newcommand{\lecture}[1]{
+  \noindent
+  \begin{center}
+  \framebox{
+    \vbox{
+      \hbox to 5.78in { {\bf CSCI567: Machine Learning } \hfill USC, Spring 2026}
+      \vspace{4mm}
+      \hbox to 5.78in { {\Large \hfill #1  \hfill} }
+      \vspace{2mm}
+      \hbox to 5.78in { {\em Instructor: Vatsal Sharan \hfill Due: February 25 by 11:59 pm PST} }
+    }
+  }
+  \end{center}
+  \vspace*{4mm}
+}
+
+\DeclareMathOperator{\sgn}{sgn}
+
+\title{USC CSCI567 Machine Learning Homework I}
+\author{Instructor: Vatsal Sharan}
+\date{Fall 2022}
+
+\begin{document}
+
+\lecture{Homework 2}
+
+\noindent\emph{We would like to thank previous 567 staff, and Gregory Valiant (Stanford) for kindly sharing many of the problems with us.}
+
+{\paragraph{A reminder on collaboration policy and academic integrity:} Our goal is to maintain an optimal learning environment. You can discuss the homework problems at a high level with other groups, but you should not look at any other group's solutions. Trying to find solutions online or from any other sources for any homework or project is prohibited, will result in zero grade and will be reported. To prevent any future plagiarism, uploading any material from the course (your solutions, quizzes etc.) on the internet is prohibited, and any violations will also be reported. Please be considerate, and help us help everyone get the best out of this course.
+
+Please remember the Student Conduct Code (Section 11.00 of the USC Student Guidebook). General principles of academic honesty include the concept of respect for the intellectual property of others, the expectation that individual work will be submitted unless otherwise allowed by an instructor, and the obligations both to protect one's own academic work from misuse by others as well as to avoid using another's work as one's own. All students are expected to understand and abide by these principles. Students will be referred to the Office of Student Judicial Affairs and Community Standards for further review, should there be any suspicion of academic dishonesty.}
+
+{\paragraph{Total points:} 64 points}
+
+{\paragraph{Notes on notation:}
+\begin{itemize}
+    \item Unless stated otherwise, scalars are denoted by small letter in normal font, vectors are denoted by small letters in bold font and matrices are denoted by capital letters in bold font.
+    \item $||.||$ means L2-norm unless specified otherwise i.e. $||.|| = ||.||_2$
+\end{itemize}
+}
+
+\section*{Instructions}
+We recommend that you use LaTeX to write up your homework solution. However, you can also scan handwritten notes. The detailed submission instructions are as follows:
+\begin{enumerate}
+    \item We use Gradescope for homework submission.
+    \item Starter code for programming-based questions is provided at \url{https://vatsalsharan.github.io/spring26/cc_hw2.zip}.
+    \item There are 3 assignments on Gradescope: the first is for the HW report, the second is to submit code, and the third is for the bonus question.
+    \begin{itemize}
+        \item The homework report should be a single PDF containing all written solutions to problems, \emph{including \underline{all} rendered plots/figures}. (Hand drawing plots is permitted only for Problem 1.)
+        \begin{itemize}
+            \item Be sure to mark which page corresponds to each question when submission to Gradescope.
+        \end{itemize}
+        \item The HW code should be submitted as a Python notebook containing the code for Problem 3, and if you are attempting the bonus question, the code for Problem 5.
+        \begin{itemize}
+            \item It suffices to fill in the TODO's in the provided starter notebook for Problem 3.
+            \item All explanations and/or rendered plots for Problem 3  (and if you attempt it, Problem 5) should be in the homework report, \emph{not} the code submission.
+        \end{itemize}
+        \item If you are attempting the optional bonus problem, you should submit the report as a pdf with  the written responses and rendered plots.
+    \end{itemize}
+\item Be sure to mark any group members on the submission page, following \href{https://guides.gradescope.com/hc/en-us/articles/21863861823373-Adding-Group-Members-to-a-Submission}{\pink{these instructions}}.
+\end{enumerate}
+
+
+\newpage
+\section*{Theory-based Questions}
+
+\subsection*{Problem 1: Support Vector Machines (\blue{19pts})}
+    \input{svm}
+\subsection*{Problem 2: Kernel Composition (\blue{6pts})}
+    \input{kernel_composition}
+
+\clearpage
+
+\section*{Programming-based Questions}
+
+
+A reminder of the instructions for the programming part. To solve the programming based questions, you need to first set up the coding environment. We use python3 (version $\geq$ 3.7) in our programming-based questions. There are multiple ways you can install python3, for example:
+\begin{itemize}[topsep=5pt, itemsep=-2pt]
+    \item You can use \href{https://docs.conda.io/en/latest/}{\pink{conda}} to configure a python3 environment for all programming assignments.
+    \item Alternatively, you can also use \href{https://virtualenv.pypa.io/en/stable/}{\pink{virtualenv}} to configure a python3 environment for all programming assignments
+\end{itemize}
+
+\noindent After you have a python3 environment, you will need to install the following python packages:
+\begin{itemize}[topsep=5pt, itemsep=-2pt]
+    \item numpy
+    \item matplotlib (for you plotting figures)
+    \item scikit-learn (only for Problem 5)
+\end{itemize}
+
+\emph{Note:} You are \textbf{not allowed} to use other packages, such as \emph{tensorflow, pytorch, keras, scipy}, etc.\ to help you implement the algorithms you learned. If you have other package requests, please ask first before using them. Note that you will be using  \emph{scikit-learn} in the provided code for Problem 5; but you are \textbf{not allowed} to use \emph{scikit-learn} for the remaining problems.
+
+\subsection*{Problem 3: Regularization (\blue{31pts})}
+    \input{regularization}
+\subsection*{Problem 4: Classifier Comparison (\blue{8 pts})}
+    \input{classifier_comparison}
+\subsection*{[Bonus] Problem 5: Logistic Regression (\blue{8 pts})}
+    \input{logistic_regression}
+
+
+\end{document}

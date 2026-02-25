@@ -1,0 +1,254 @@
+This problem is a continuation of the linear regression problem from the previous homework (HW1 Problem 5). Let us recall the setup. Given
+$d$-dimensional input data
+$\textbf{x}_1,\ldots, \textbf{x}_n \in \mathbb{R}^d$ with
+real-valued labels $y_1,\ldots, y_n \in \mathbb{R}$, the goal
+is to find the coefficient vector $\textbf{w}$ that minimizes the sum
+of the squared errors.  The total squared error of $\mathbf{w}$ can be
+written as
+$f(\mathbf{w})=\sum_{i=1}^{n}f_i(\mathbf{w})$, where
+$f_i(\mathbf{w})=(\mathbf{w^T x_i}-y_i)^2$ denotes the
+squared error of the $i$th data point. We will refer to $f(\w)$ as the \emph{objective function} for the problem.
+
+Last homework, we considered the scenario where the number of data points was much larger than the number of dimensions and
+hence we did not worry too much about generalization. (If you remember, the gap between training and test accuracies in 5.1 of the last HW was not too large).  We will
+now consider the setting where $d=n$, and examine the test error along
+with the training error. Use the following Python code for generating
+the training data and test data.
+
+\begin{verbatim}
+import numpy as np
+
+train_n = 100
+test_n = 1000
+d = 100
+
+X_train = np.random.normal(0,1, size=(train_n,d))
+w_true = np.random.normal(0,1, size=(d,1))
+y_train = X_train.dot(w_true) + np.random.normal(0,0.5,size=(train_n,1))
+
+X_test = np.random.normal(0,1, size=(test_n,d))
+y_test = X_test.dot(w_true) + np.random.normal(0,0.5,size=(test_n,1))
+
+\end{verbatim}
+
+\textbf{3.1} (\blue{2pts}) We will first setup a baseline, by finding the test
+  error of the linear regression solution
+  $\textbf{w}=\mathbf{X^{-1}y}$ without any regularization.  This is
+  the closed-form solution for the minimizer of the objective function
+  $f(\mathbf{w})$.  (Note the formula is simpler than what we saw in the last homework because
+  now $\mathbf{X}$ is square as $d=n$).  Report the training error and test
+  error of this approach, \emph{averaged over 10 trials}. For better
+  interpretability, report the normalized error
+  $\hat{f}(\textbf{w})$ rather than the value of the objective function
+  ${f}(\textbf{w})$, where we define $\hat{f}(\textbf{w})$ as
+\[ 
+\hat{f}(\textbf{w})=\frac{\parallel{\mathbf{Xw-y}}\parallel_2}{\parallel{\mathbf{y}}\parallel_2}.
+\]
+
+\emph{Note on averaging over multiple trials:} We're doing this to get a better estimate of the performance of the algorithm. To do this, simply run the entire process (including data generation, and sampling $w_{\text{true}}$) 10 times, and find the average value of $\hat{f}(\textbf{w})$ over these 10 trials. \\
+
+\noindent{\fontsize{11}{12}\selectfont\textbf{Solution 3.1}
+
+For the unregularized least-squares objective
+\[
+F(\mathbf w)=\|X\mathbf w-\mathbf y\|_2^2,
+\]
+setting has \(d=n\), so we use the closed form
+\[
+\mathbf w_{LS}=X^{-1}\mathbf y.
+\]
+For each trial, we compute \(\hat f\) on train and test data, then average across 10 trials. The resulting values are:
+\[
+\hat f_{train}=3.6466\times 10^{-15},
+\qquad
+\hat f_{test}=2.9623.
+\]
+The training error is essentially zero while the test error is large. This indicates interpolation of training noise and clear overfitting in this high-dimensional regime.
+
+\bigskip
+
+
+\textbf{3.2} (\blue{7pts}) We will now examine $\ell_2$ regularization as a means to prevent overfitting. The $\ell_2$ regularized objective function is given by the following expression:
+$$ \sum_{i=1}^{m} (\mathbf{w^T x_{i}}-{y}_{i})^2 + \lambda \| \mathbf{w}\|_2^2.$$
+As discussed in class, this has a closed-form solution
+$\textbf{w}=\mathbf{(X^TX+\lambda I)^{-1}X^Ty}$. Using this closed-form
+solution, present a plot of the normalized training error and
+normalized test error $\hat{f}(\textbf{w})$ for
+$\lambda = \{0.0005, 0.005, 0.05, 0.5, 5, 50, 500\}$. As before, you
+should average over 10 trials. Discuss the characteristics of your
+plot, and also compare it to your answer to~(\textbf{3.1}).\\
+
+\noindent \emph{The following questions explore the concept of implicit regularization. This is a very active topic of research, with the idea being that optimization algorithms such as SGD can themselves act like regularizers (in the sense that they prefer the solutions to the regularized problems instead of just the original problem). There's no one correct answer we're looking for in many of these questions, and idea is to make you think about what is happening and report your findings.}\\
+
+\noindent{\fontsize{11}{12}\selectfont\textbf{Solution 3.2}
+
+We now solve ridge regression:
+\[
+\min_{\mathbf w}\ \|X\mathbf w-\mathbf y\|_2^2+\lambda\|\mathbf w\|_2^2,
+\qquad
+\mathbf w_{ridge}(\lambda)=(X^TX+\lambda I)^{-1}X^T\mathbf y.
+\]
+We evaluate
+\[
+\lambda\in\{0.0005,0.005,0.05,0.5,5,50,500\}
+\]
+and report averages over 10 trials.
+
+\begin{table}[H]
+\centering
+\caption{Averaged normalized train/test errors for ridge regression}
+\begin{tabular}{ccc}
+\toprule
+$\lambda$ & Avg. train error & Avg. test error \\
+\midrule
+0.0005 & 0.0016 & 0.7017 \\
+0.005  & 0.0029 & 0.4241 \\
+0.05   & 0.0060 & 0.2663 \\
+0.5    & 0.0155 & \textbf{0.2324} \\
+5      & 0.0651 & 0.3416 \\
+50     & 0.2784 & 0.5691 \\
+500    & 0.7300 & 0.8567 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The best test performance is obtained at \(\lambda=0.5\), with test error \(0.2324\).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{fig_3_2_ridge_curve.png}
+\caption{Train and test error versus $\lambda$}
+\end{figure}
+
+As \(\lambda\) increases, training error increases due to stronger shrinkage. Test error first decreases, then increases, which matches the bias-variance tradeoff. Compared with 3.1, moderate regularization improves generalization significantly.
+
+\bigskip
+
+\textbf{3.3} (\blue{7pts}) Run stochastic gradient descent (SGD) on the original objective
+function $f(\mathbf{w})$, with the initial guess of $\textbf{w}$ set to be the all 0's vector.  Run SGD for 1,000,000 iterations for each different choice of the step size, $\{0.00005$, $0.0005$, $0.005\}$.  Report the
+ normalized training error and the normalized test
+error for each of these three settings, averaged over 10 trials. How does the SGD solution compare with the
+solutions obtained using $\ell_2$ regularization? Note that SGD is
+minimizing the original objective function, which does \emph{not} have any
+regularization. In Part (\textbf{3.1}) of this problem, we found the
+\emph{optimal} solution to the original objective function with
+respect to the training data. How does the training and test error of
+the SGD solutions compare with those of the solution in~(\textbf{3.1})? 
+Can you explain your observations?   (It may be helpful to also compute the normalized training and test error corresponding to the true coefficient vector $\textbf{w}^*$ for comparison, this is \verb|w_true| in the code.)\\
+
+\noindent{\fontsize{11}{12}\selectfont\textbf{Solution 3.3}
+
+We run SGD on the original (unregularized) objective. For one sampled point \((\mathbf x_i,y_i)\), let
+\[
+F_i(\mathbf w)=(\mathbf w^T\mathbf x_i-y_i)^2,
+\quad
+\nabla F_i(\mathbf w)=2(\mathbf w^T\mathbf x_i-y_i)\mathbf x_i.
+\]
+Hence the update is
+\[
+\mathbf w^{(t+1)}=\mathbf w^{(t)}-\eta\cdot 2(\mathbf w^{(t)T}\mathbf x_i-y_i)\mathbf x_i.
+\]
+We use \(\mathbf w^{(0)}=\mathbf 0\), run for \(10^6\) iterations, and average over 10 trials for
+\(\eta\in\{0.00005,0.0005,0.005\}\).
+
+\begin{table}[H]
+\centering
+\caption{Averaged normalized train/test errors for SGD}
+\begin{tabular}{ccc}
+\toprule
+Step size $\eta$ & Avg. train error & Avg. test error \\
+\midrule
+0.00005 & 0.0135 & 0.2148 \\
+0.0005  & 0.0068 & \textbf{0.2041} \\
+0.005   & 0.0034 & 0.4039 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The best final test error is obtained at \(\eta=0.0005\), with value \(0.2041\).
+Compared with 3.1, SGD gives much better test performance, even without explicit L2 regularization. Compared with 3.2, the best SGD run is better than the best ridge run in this experiment, which is consistent with implicit regularization from optimization dynamics. The largest step size reaches lower training error but much worse test error, indicating unstable generalization.
+
+\bigskip
+
+\textbf{3.4} (\blue{10pts}) We will now examine the behavior of SGD in more detail. Let $\mathbf{w}^{(t)}$ refer to the SGD solution at the $t$-th iteration. For step sizes $\{0.00005,0.005\}$ and 1,000,000 iterations of SGD (and a single trial), 
+\begin{itemize}
+\item [(i)] Plot the normalized training error of the SGD iterate $\mathbf{w}^{(t)}$ vs.\ the iteration
+  number $t$. On the plot of training error, draw a line parallel to the
+  x-axis indicating the error $\hat{f}(\textbf{w}^*)$ of
+  the true model $\textbf{w}^*.$
+
+	\item [(ii)] Plot the normalized test error of the SGD iterate $\mathbf{w}^{(t)}$ vs.\ the iteration number $t$. Your code might take a long time to run if you compute the test error after every SGD step---feel free to compute the test error every 100 iterations of SGD to make the plots.
+	\item [(iii)] Plot the $\ell_2$ norm of the SGD iterate $\mathbf{w}^{(t)}$ vs.\
+ the iteration number $t$.
+
+\end{itemize}
+  Comment on the plots. What can you say about the generalization ability of SGD with different step sizes? Does the plot correspond to the intuition that a learning algorithm starts to overfit when the training error becomes too small, i.e. smaller than the noise level of the true model so that the model is fitting the noise in the data? How does the generalization ability of the final solution depend on the $\ell_2$ norm of the final solution?\\
+
+  \noindent{\fontsize{11}{12}\selectfont\textbf{Solution 3.4}
+  
+For a single trial, we run SGD for \(10^6\) iterations with step sizes \(\{0.00005,0.005\}\), and track trajectories (test metrics logged every 100 iterations).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{fig_3_4_train_curve.png}
+\caption{Training error trajectory, with horizontal reference line for $\hat f(w^*)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{fig_3_4_test_curve.png}
+\caption{Test error trajectory}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{fig_3_4_norm_curve.png}
+\caption{Parameter norm trajectory $\|w^{(t)}\|_2$}
+\end{figure}
+
+The training curve keeps decreasing, but the test curve does not necessarily keep improving; it usually improves first and then plateaus or degrades, indicating overfitting onset. The larger step size tends to produce faster norm growth and noisier dynamics, with less stable test behavior. Overall, trajectories ending at smaller norm are associated with better test performance.
+
+\bigskip
+
+\textbf{3.5} (\blue{5pts}) We will now examine the effect of the starting point on the SGD solution. Fixing the step size at $0.00005$ and the maximum number of iterations at 1,000,000, choose the initial point randomly from the $d$-dimensional sphere with radius $r=\{0, 0.1, 0.5, 1, 10, 20, 30\}$ (to do this random initialization, you can sample from the standard Gaussian $N(0,\mathbf{I})$, and then renormalize the sampled point to have $\ell_2$ norm $r$). Plot the average normalized training error and the average normalized test error over 10 trials vs $r$. Comment on the results, in relation to the results from part (\textbf{3.2}) where you explored different $\ell_2$ regularization coefficients. Can you provide an explanation for the behavior seen in this plot?\\
+
+\noindent{\fontsize{11}{12}\selectfont\textbf{Solution 3.5}
+We fix \(\eta=0.00005\) and \(10^6\) iterations, and initialize from a random point on the sphere of radius
+\[
+r\in\{0,0.1,0.5,1,10,20,30\}.
+\]
+All values are averaged over 10 trials.
+
+\begin{table}[H]
+\centering
+\caption{Averaged normalized train/test errors versus initialization radius}
+\begin{tabular}{ccc}
+\toprule
+Radius $r$ & Avg. train error & Avg. test error \\
+\midrule
+0   & 0.0116 & 0.2355 \\
+0.1 & 0.0116 & 0.2353 \\
+0.5 & 0.0116 & 0.2345 \\
+1   & 0.0115 & \textbf{0.2338} \\
+10  & 0.0132 & 0.2778 \\
+20  & 0.0189 & 0.4064 \\
+30  & 0.0260 & 0.5650 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{fig_3_5_init_radius_curve.png}
+\caption{Train/test error versus initialization radius}
+\end{figure}
+
+For small radii (0 to 1), the test errors are close and relatively low. As radius increases to 10, 20, and 30, test performance degrades sharply. This shows that initialization influences the region SGD converges to, affecting norm and generalization. The trend is consistent with the small-norm preference observed in explicit L2 regularization.
+
+\bigskip
+
+\section*{Conclusion}
+Across all subproblems, the same pattern appears: exact training fit does not guarantee good test performance. Explicit regularization (ridge) and implicit regularization (through SGD step size, trajectory, and initialization) both control effective complexity and improve generalization.
+
+
+\bigskip

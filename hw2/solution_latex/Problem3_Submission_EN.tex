@@ -1,0 +1,173 @@
+﻿\documentclass[12pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{setspace}
+\setstretch{1.2}
+
+\begin{document}
+\begin{center}
+{\LARGE \textbf{Problem 3}}
+\end{center}
+\vspace{0.5em}
+
+\noindent\textbf{Experiment setup.} We follow the homework data generation exactly with
+\(train\_n=100\), \(test\_n=1000\), and \(d=100\), and noise standard deviation \(0.5\).
+For all parts except 3.4, we average over 10 independent trials. Throughout the problem, we report
+\[
+\hat f(\mathbf w)=\frac{\|X\mathbf w-\mathbf y\|_2}{\|\mathbf y\|_2}
+\]
+as the normalized objective value.
+
+\section*{Solution 3.1}
+For the unregularized least-squares objective
+\[
+F(\mathbf w)=\|X\mathbf w-\mathbf y\|_2^2,
+\]
+the homework setting has \(d=n\), so we use the closed form
+\[
+\mathbf w_{LS}=X^{-1}\mathbf y.
+\]
+For each trial, we compute \(\hat f\) on train and test data, then average across 10 trials. The resulting values are:
+\[
+\hat f_{train}=3.6466\times 10^{-15},
+\qquad
+\hat f_{test}=2.9623.
+\]
+The training error is essentially zero while the test error is large. This indicates interpolation of training noise and clear overfitting in this high-dimensional regime.
+
+\section*{Solution 3.2}
+We now solve ridge regression:
+\[
+\min_{\mathbf w}\ \|X\mathbf w-\mathbf y\|_2^2+\lambda\|\mathbf w\|_2^2,
+\qquad
+\mathbf w_{ridge}(\lambda)=(X^TX+\lambda I)^{-1}X^T\mathbf y.
+\]
+We evaluate
+\[
+\lambda\in\{0.0005,0.005,0.05,0.5,5,50,500\}
+\]
+and report averages over 10 trials.
+
+\begin{table}[H]
+\centering
+\caption{Averaged normalized train/test errors for ridge regression}
+\begin{tabular}{ccc}
+\toprule
+$\lambda$ & Avg. train error & Avg. test error \\
+\midrule
+0.0005 & 0.0016 & 0.7017 \\
+0.005  & 0.0029 & 0.4241 \\
+0.05   & 0.0060 & 0.2663 \\
+0.5    & 0.0155 & \textbf{0.2324} \\
+5      & 0.0651 & 0.3416 \\
+50     & 0.2784 & 0.5691 \\
+500    & 0.7300 & 0.8567 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The best test performance is obtained at \(\lambda=0.5\), with test error \(0.2324\).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{results/fig_3_2_ridge_curve.png}
+\caption{Train and test error versus $\lambda$}
+\end{figure}
+
+As \(\lambda\) increases, training error increases due to stronger shrinkage. Test error first decreases, then increases, which matches the bias-variance tradeoff. Compared with 3.1, moderate regularization improves generalization significantly.
+
+\section*{Solution 3.3}
+We run SGD on the original (unregularized) objective. For one sampled point \((\mathbf x_i,y_i)\), let
+\[
+F_i(\mathbf w)=(\mathbf w^T\mathbf x_i-y_i)^2,
+\quad
+\nabla F_i(\mathbf w)=2(\mathbf w^T\mathbf x_i-y_i)\mathbf x_i.
+\]
+Hence the update is
+\[
+\mathbf w^{(t+1)}=\mathbf w^{(t)}-\eta\cdot 2(\mathbf w^{(t)T}\mathbf x_i-y_i)\mathbf x_i.
+\]
+We use \(\mathbf w^{(0)}=\mathbf 0\), run for \(10^6\) iterations, and average over 10 trials for
+\(\eta\in\{0.00005,0.0005,0.005\}\).
+
+\begin{table}[H]
+\centering
+\caption{Averaged normalized train/test errors for SGD}
+\begin{tabular}{ccc}
+\toprule
+Step size $\eta$ & Avg. train error & Avg. test error \\
+\midrule
+0.00005 & 0.0135 & 0.2148 \\
+0.0005  & 0.0068 & \textbf{0.2041} \\
+0.005   & 0.0034 & 0.4039 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The best final test error is obtained at \(\eta=0.0005\), with value \(0.2041\).
+Compared with 3.1, SGD gives much better test performance, even without explicit L2 regularization. Compared with 3.2, the best SGD run is better than the best ridge run in this experiment, which is consistent with implicit regularization from optimization dynamics. The largest step size reaches lower training error but much worse test error, indicating unstable generalization.
+
+\section*{Solution 3.4}
+For a single trial, we run SGD for \(10^6\) iterations with step sizes \(\{0.00005,0.005\}\), and track trajectories (test metrics logged every 100 iterations).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{results/fig_3_4_train_curve.png}
+\caption{Training error trajectory, with horizontal reference line for $\hat f(w^*)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{results/fig_3_4_test_curve.png}
+\caption{Test error trajectory}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{results/fig_3_4_norm_curve.png}
+\caption{Parameter norm trajectory $\|w^{(t)}\|_2$}
+\end{figure}
+
+The training curve keeps decreasing, but the test curve does not necessarily keep improving; it usually improves first and then plateaus or degrades, indicating overfitting onset. The larger step size tends to produce faster norm growth and noisier dynamics, with less stable test behavior. Overall, trajectories ending at smaller norm are associated with better test performance.
+
+\section*{Solution 3.5}
+We fix \(\eta=0.00005\) and \(10^6\) iterations, and initialize from a random point on the sphere of radius
+\[
+r\in\{0,0.1,0.5,1,10,20,30\}.
+\]
+All values are averaged over 10 trials.
+
+\begin{table}[H]
+\centering
+\caption{Averaged normalized train/test errors versus initialization radius}
+\begin{tabular}{ccc}
+\toprule
+Radius $r$ & Avg. train error & Avg. test error \\
+\midrule
+0   & 0.0116 & 0.2355 \\
+0.1 & 0.0116 & 0.2353 \\
+0.5 & 0.0116 & 0.2345 \\
+1   & 0.0115 & \textbf{0.2338} \\
+10  & 0.0132 & 0.2778 \\
+20  & 0.0189 & 0.4064 \\
+30  & 0.0260 & 0.5650 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{results/fig_3_5_init_radius_curve.png}
+\caption{Train/test error versus initialization radius}
+\end{figure}
+
+For small radii (0 to 1), the test errors are close and relatively low. As radius increases to 10, 20, and 30, test performance degrades sharply. This shows that initialization influences the region SGD converges to, affecting norm and generalization. The trend is consistent with the small-norm preference observed in explicit L2 regularization.
+
+\section*{Conclusion}
+Across all subproblems, the same pattern appears: exact training fit does not guarantee good test performance. Explicit regularization (ridge) and implicit regularization (through SGD step size, trajectory, and initialization) both control effective complexity and improve generalization.
+
+\end{document}

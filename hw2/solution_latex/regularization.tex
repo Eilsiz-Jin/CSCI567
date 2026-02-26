@@ -63,7 +63,7 @@ For each trial, we compute \(\hat f\) on train and test data, then average acros
 \qquad
 \hat f_{test}=2.9623.
 \]
-The training error is essentially zero while the test error is large. This indicates interpolation of training noise and clear overfitting in this high-dimensional regime.
+The training error is essentially zero while the test error is large. This indicates interpolation of training noise and clear overfitting in this high-dimensional regime. The matrix is an almost necessarily invertible square matrix, so the closed-form solution actually precisely solves the linear system, this indicates that the model can perfectly fit the training data (including the noise within it), so the training error is numerically close to the machine precision error. Although the training error is almost zero, due to the same number of parameters and samples, the model not only fits the actual signal but also captures the noise in the training data. Therefore, its generalization ability is very poor on new test data.
 
 \bigskip
 
@@ -120,7 +120,12 @@ The best test performance is obtained at \(\lambda=0.5\), with test error \(0.23
 \caption{Train and test error versus $\lambda$}
 \end{figure}
 
-As \(\lambda\) increases, training error increases due to stronger shrinkage. Test error first decreases, then increases, which matches the bias-variance tradeoff. Compared with 3.1, moderate regularization improves generalization significantly.
+As \(\lambda\) increases, the training error monotonically rises, while the test error shows a typical U-shaped curve. When \(\lambda\) is small, the model almost perfectly fits the training data (the training error is close to 0), but the test error is relatively high; when \(\lambda\) is moderate (about 0.5), the test error reaches its minimum; as \(\lambda\) further increases, both the training and test errors rise simultaneously, indicating underfitting. 
+
+When \(\lambda\) is very small, regularization has almost no effect and the model approaches a non-regularized state, thus still overfitting the training noise and resulting in a high test error. An appropriate \(\lambda\) will penalize the weight norm, making the model smoother and thereby improving the generalization performance; however, when \(\lambda\) is too large, the model is overly constrained and cannot adequately fit the true signal, leading to underfitting and the test error rising again.
+
+Comparison with 3.1 
+In 3.1, the test error without regularization was approximately 6.09, which was much higher than the test error of about 0.22 when using the optimal \(\lambda\) (approximately 0.5) in this problem. This indicates that $\ell_2$ regularization significantly alleviated the overfitting problem and greatly enhanced the generalization ability of the model. In contrast, without regularization, although the training error was close to 0, the test error was extremely high, demonstrating severe overfitting.
 
 \bigskip
 
@@ -165,11 +170,31 @@ Step size $\eta$ & Avg. train error & Avg. test error \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{fig_3_3_norm_curve.png}
+\caption{Training error trajectory, with horizontal reference line for $\hat f(w^*)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{fig_3_3_train_test_curve.png}
+\caption{Training error trajectory, with horizontal reference line for $\hat f(w^*)$}
+\end{figure}
+
 The best final test error is obtained at \(\eta=0.0005\), with value \(0.2041\).
-Compared with 3.1, SGD gives much better test performance, even without explicit L2 regularization. Compared with 3.2, the best SGD run is better than the best ridge run in this experiment, which is consistent with implicit regularization from optimization dynamics. The largest step size reaches lower training error but much worse test error, indicating unstable generalization.
+As the step size increases, both the training error and the test error decrease significantly. A smaller step size ($5e^{-5}$) did not converge adequately after 1,000,000 iterations, resulting in high training and test errors; while a larger step size ($5e^{-3}$) could approach the optimal solution more quickly, thereby significantly reducing the errors. 
+\bigskip
+
+Compared with the optimal ridge solution in Section 3.2 (with a test error of approximately 0.22), the best test error of SGD under the current settings (approximately 0.40) is still higher. This indicates that although SGD performs well in optimizing the original objective function, due to the lack of explicit regularization, its generalization performance is still inferior to the solution with appropriate $\ell_2$ regularization. 
+
+In comparison in 3.1, the training error of the closed-form solution is close to 0, but the test error is as high as approximately 6, indicating severe overfitting. However, the training error of the current SGD does not approach 0, and the test error is significantly lower. This suggests that SGD has not fully converged to the exact interpolation solution of the training data but has remained near a solution with a smaller norm, thereby demonstrating better generalization ability.
 
 \bigskip
 
+The optimization algorithm itself plays a role similar to regularization to some extent, and thus the obtained solutions perform better on the test set than the closed-form solution that perfectly fits the training data.
+
+\bigskip
 \textbf{3.4} (\blue{10pts}) We will now examine the behavior of SGD in more detail. Let $\mathbf{w}^{(t)}$ refer to the SGD solution at the $t$-th iteration. For step sizes $\{0.00005,0.005\}$ and 1,000,000 iterations of SGD (and a single trial), 
 \begin{itemize}
 \item [(i)] Plot the normalized training error of the SGD iterate $\mathbf{w}^{(t)}$ vs.\ the iteration
@@ -194,11 +219,15 @@ For a single trial, we run SGD for \(10^6\) iterations with step sizes \(\{0.000
 \caption{Training error trajectory, with horizontal reference line for $\hat f(w^*)$}
 \end{figure}
 
+The training error decreases monotonically with the increase in the number of iterations and eventually approaches 0, indicating that SGD can eventually fit the training data. However, with a larger step size, the training error decreases more rapidly, while with a smaller step size, it takes a longer time to reach the same level.
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.78\linewidth]{fig_3_4_test_curve.png}
 \caption{Test error trajectory}
 \end{figure}
+
+The test error initially decreases as the training progresses, but after the training error continues to decrease, the test error may start to rise or stabilize. This phenomenon indicates that when the model begins to overfit the noise in the training data, its generalization ability will decline. Larger step sizes usually achieve a lower test error in the early stage, but they may also cause greater fluctuations.
 
 \begin{figure}[H]
 \centering
@@ -206,7 +235,15 @@ For a single trial, we run SGD for \(10^6\) iterations with step sizes \(\{0.000
 \caption{Parameter norm trajectory $\|w^{(t)}\|_2$}
 \end{figure}
 
-The training curve keeps decreasing, but the test curve does not necessarily keep improving; it usually improves first and then plateaus or degrades, indicating overfitting onset. The larger step size tends to produce faster norm growth and noisier dynamics, with less stable test behavior. Overall, trajectories ending at smaller norm are associated with better test performance.
+As the iterations proceed, the weight norm $\|w\|_2$ continues to increase and reaches a maximum value when the training error approaches 0. This indicates that the model gradually increases the parameter norm in an attempt to further reduce the training error, which may lead to fitting noise. Smaller norms typically correspond to better generalization performance.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{fig_3_4_norm_error_iter.png}
+\caption{different steps sgd curves}
+\end{figure}
+
+As can be seen in the figure, when the training error becomes extremely small (close to 0), the test error no longer decreases but starts to increase, and at the same time, $\|w\|_2$ significantly increases. This is in line with the intuition of overfitting: when the training error is lower than the actual noise level, the model begins to fit the noise. When the test error is at its minimum, $\|w\|_2$ is usually small. As $\|w\|_2$ increases, the test error rises. This is consistent with the ridge result in 3.2: the small-norm solution has better generalization ability. Therefore, due to its limited number of steps and initialization method, SGD tends to converge to solutions with smaller norms, which is a form of implicit regularization.
 
 \bigskip
 
@@ -243,10 +280,27 @@ Radius $r$ & Avg. train error & Avg. test error \\
 \caption{Train/test error versus initialization radius}
 \end{figure}
 
-For small radii (0 to 1), the test errors are close and relatively low. As radius increases to 10, 20, and 30, test performance degrades sharply. This shows that initialization influences the region SGD converges to, affecting norm and generalization. The trend is consistent with the small-norm preference observed in explicit L2 regularization.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{fig_3_5_error_radius_curve.png}
+\caption{Train/test error versus step size}
+\end{figure}
+
+As the initialization radius r increases, the training error slightly rises, while the test error significantly increases. When r is very small (close to 0), the test error is the lowest. When r increases to 10, 20, and 30, the test error significantly deteriorates. This indicates that the initialization scale has an impact on the generalization performance of the final model.
+
+The reasons for these phenomena are that although SGD optimizes the unregularized objective function, the initialization radius actually affects the norm of the final converged solution. When starting from a smaller radius, SGD is more likely to converge to a solution with a smaller norm; while starting from a larger radius, the weights are more likely to maintain a larger norm during training, which leads to more severe overfitting.
 
 \bigskip
 
+Compared with 3.2, in 3.5, the smaller initialization radius plays a similar role - it limits the scale of the final solution of the model. Therefore, the initialization radius and $\ell_2$ act to some extent as an "implicit regularization" mechanism.
+
+comparing with 3.4, it can be observed that different initialization radii can optimize the path, thereby affecting the final weight norm and consequently influencing the generalization ability.
+
+\bigskip
+
+3.5 It may also demonstrate an important fact: The convergence point of SGD is not only dependent on the objective function, but also on the optimization path and the initialization. When the initialization radius is very large, SGD needs to "shrink back" to a reasonable area; if the step size is small or the number of iterations is limited, the model may remain near a solution with a larger norm, thereby exhibiting poor test error.
+
+\bigskip
 \section*{Conclusion}
 Across all subproblems, the same pattern appears: exact training fit does not guarantee good test performance. Explicit regularization (ridge) and implicit regularization (through SGD step size, trajectory, and initialization) both control effective complexity and improve generalization.
 
